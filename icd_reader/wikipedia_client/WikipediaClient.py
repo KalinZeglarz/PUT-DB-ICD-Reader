@@ -1,5 +1,7 @@
 import http.client
 
+from icd_reader.wikipedia_client import helpers
+
 
 class WikipediaClient:
     http_client: http.client.HTTPSConnection
@@ -14,16 +16,15 @@ class WikipediaClient:
     def search(self, text: str) -> http.client.HTTPResponse:
         """Searches Wikipedia with given text"""
 
-        endpoint: str = '/w/api.php?'
-        http_params: list = ['action=query', 'list=search', 'format=json', 'srsearch=' + text]
-        params_index: int = 0
-        while params_index < len(http_params):
-            endpoint += http_params[params_index]
-            if params_index < len(http_params) - 1:
-                endpoint += '&'
-            params_index += 1
-
-        print(endpoint)
-        self.http_client.request('GET', endpoint)
+        endpoint: str = '/w/api.php'
+        http_params: dict = {
+            'action': 'query',
+            'list': 'search',
+            'format': 'json',
+            'srsearch': text
+        }
+        endpoint_with_params: str = helpers.add_http_parameters(endpoint, http_params)
+        print(endpoint_with_params)
+        self.http_client.request('GET', endpoint_with_params)
 
         return self.http_client.getresponse()
