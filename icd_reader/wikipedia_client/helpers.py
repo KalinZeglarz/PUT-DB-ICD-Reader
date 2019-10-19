@@ -7,3 +7,4 @@ def add_http_parameters(url: str, params: dict) -> str:
             result += '&'
         params_added += 1
     return result
+
