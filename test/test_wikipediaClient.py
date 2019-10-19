@@ -1,12 +1,11 @@
 import http.client
 import json
-import unittest
+from unittest import TestCase
 
 from icd_reader.wikipedia_client.WikipediaClient import WikipediaClient
 
 
-class TestWikipediaClient(unittest.TestCase):
-
+class TestWikipediaClient(TestCase):
     def test_constructor(self):
         wikipedia_client = WikipediaClient('pl')
         self.assertIsNotNone(wikipedia_client)
@@ -18,8 +17,3 @@ class TestWikipediaClient(unittest.TestCase):
         parsed_response_content: dict = json.loads(response.read())
         self.assertIsNotNone(parsed_response_content['query']['search'])
         print(parsed_response_content['query']['search'])
-
-
-if __name__ == '__main__':
-    unittest.main()
-
