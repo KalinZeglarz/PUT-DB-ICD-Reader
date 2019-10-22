@@ -63,12 +63,3 @@ class HtmlParser:
             search_result: tuple = HtmlParser.__find_disease_in_section(section, icd_code.upper())
             if search_result is not None:
                 return search_result
-
-    @staticmethod
-    def find_disease_page_language_link(html: str, language: str) -> str:
-        html_object: BeautifulSoup = BeautifulSoup(html, 'html.parser')
-        for language_line in html_object.findAll('#p-lang li'):
-            if language_line.get('style') != 'display: none;':
-                if language_line.a.get('lang') == language:
-                    return language_line.a.get('href')
-        return ''
