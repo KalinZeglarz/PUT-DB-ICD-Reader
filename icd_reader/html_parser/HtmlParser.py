@@ -7,6 +7,8 @@ class HtmlParser:
 
     @staticmethod
     def find_icd_section_title(html: str, icd_code: str) -> str:
+        """Finds link for disease section page on ICD-10 english page"""
+
         html_object: BeautifulSoup = BeautifulSoup(html, 'html.parser')
 
         if html_object.title == 'ICD-10 - Wikipedia':
@@ -52,6 +54,8 @@ class HtmlParser:
 
     @staticmethod
     def find_disease_name_and_link(html: str, icd_code: str) -> tuple:
+        """Finds disease on disease section page and returns its link and title"""
+
         html_object: BeautifulSoup = BeautifulSoup(html, 'html.parser')
 
         if html_object.title == 'ICD-10 - Wikipedia':

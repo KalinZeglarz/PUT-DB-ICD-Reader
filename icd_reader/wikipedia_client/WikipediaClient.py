@@ -68,6 +68,8 @@ class WikipediaClient:
 
     @staticmethod
     def get_language_url_from_json(langlinks_response_json: dict, language: str) -> str:
+        """Extracts url for page in given language from langlinks api response"""
+
         pages: dict = langlinks_response_json['query']['pages']
         langlinks: list = []
         for page in pages.values():

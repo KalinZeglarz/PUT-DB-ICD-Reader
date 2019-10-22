@@ -1,4 +1,6 @@
 def add_http_parameters(url: str, params: dict) -> str:
+    """Adds HTTP parameters to url"""
+
     result: str = url + '?'
     params_added: int = 0
     for param in params:
@@ -7,4 +9,3 @@ def add_http_parameters(url: str, params: dict) -> str:
             result += '&'
         params_added += 1
     return result
-

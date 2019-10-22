@@ -7,13 +7,15 @@ from icd_reader.wikipedia_client.WikipediaClient import WikipediaClient
 class IcdReader:
     wikipedia_client: WikipediaClient
 
-    def __init__(self, lang: str):
-        self.wikipedia_client = WikipediaClient(lang)
+    def __init__(self):
+        self.wikipedia_client = WikipediaClient('en')
 
     def __del__(self):
         pass
 
     def get_disease_wikipedia_data(self, icd_code: str) -> tuple:
+        """ Returns title, english and polish wikipedia articles links"""
+
         icd_code_upper: str = icd_code.upper()
         icd_10_search_result: dict = self.wikipedia_client.search('ICD-10')
         icd_list_page_title: str = icd_10_search_result['query']['search'][0]['title']
