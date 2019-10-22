@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 
 
 class HtmlParser:
+    """Contains method used for getting desired data from wikipedia pages HTML"""
 
     @staticmethod
     def find_icd_section_title(html: str, icd_code: str) -> str:

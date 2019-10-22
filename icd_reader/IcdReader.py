@@ -5,6 +5,8 @@ from icd_reader.wikipedia_client.WikipediaClient import WikipediaClient
 
 
 class IcdReader:
+    """Handles readings of ICD codes and getting data bout it from wikipedia"""
+
     wikipedia_client: WikipediaClient
 
     def __init__(self):

@@ -5,6 +5,8 @@ from icd_reader import helpers
 
 
 class WikipediaClient:
+    """Contains methods used to communicate with wikipedia API"""
+
     http_client: http.client.HTTPSConnection
 
     def __init__(self, lang: str):
