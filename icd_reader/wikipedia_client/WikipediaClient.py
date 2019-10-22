@@ -24,7 +24,7 @@ class WikipediaClient:
             'action': 'query',
             'list': 'search',
             'format': 'json',
-            'srsearch': text
+            'srsearch': text.replace(' ', '%20')
         }
         endpoint_with_params: str = helpers.add_http_parameters(endpoint, http_params)
         self.http_client.request('GET', endpoint_with_params)

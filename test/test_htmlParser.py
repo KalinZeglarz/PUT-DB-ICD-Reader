@@ -24,5 +24,5 @@ class TestHtmlParser(TestCase):
         icd_disease_group_page_html: str = str(wikipedia.page(icd_disease_group_page_title).html())
         link, title = HtmlParser.find_disease_name_and_link(icd_disease_group_page_html, 'E10.3')
 
-        self.assertEqual('https://en.wikipedia.org/wiki/Diabetic_retinopathy', link)
+        self.assertEqual('/wiki/Diabetic_retinopathy', link)
         self.assertEqual('Diabetic retinopathy', title)
