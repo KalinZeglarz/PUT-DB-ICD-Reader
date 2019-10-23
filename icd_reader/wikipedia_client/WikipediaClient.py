@@ -24,7 +24,7 @@ class WikipediaClient:
             'action': 'query',
             'list': 'search',
             'format': 'json',
-            'srsearch': text.replace(' ', '%20')
+            'srsearch': text
         }
         endpoint_with_params: str = helpers.add_http_parameters(endpoint, http_params)
         self.http_client.request('GET', endpoint_with_params)
@@ -38,7 +38,7 @@ class WikipediaClient:
         endpoint: str = '/w/api.php'
         http_params: dict = {
             'action': 'query',
-            'titles': title.replace(' ', '%20'),
+            'titles': title,
             'prop': 'langlinks',
             'format': 'json',
             'llprop': 'url'
@@ -55,7 +55,7 @@ class WikipediaClient:
         endpoint: str = '/w/api.php'
         http_params: dict = {
             'action': 'query',
-            'titles': title.replace(' ', '%20'),
+            'titles': title,
             'prop': 'langlinks',
             'format': 'json',
             'llprop': 'url',

@@ -29,5 +29,6 @@ class IcdReader:
         url, title = HtmlParser.find_disease_name_and_link(disease_group_page_html, icd_code_upper)
 
         polish_language_url: str = self.wikipedia_client.get_article_language_url(title, 'pl')
+        english_language_url: str = 'https://en.wikipedia.org' + url
 
-        return title, 'https://en.wikipedia.org' + url, polish_language_url
+        return title, english_language_url, polish_language_url
