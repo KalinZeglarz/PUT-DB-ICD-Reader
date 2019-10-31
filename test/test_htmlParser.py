@@ -1,9 +1,10 @@
+"""Unit tests for HtmlParser class"""
 from unittest import TestCase
 
 from wikipedia import wikipedia
 
-from icd_reader.html_parser.HtmlParser import HtmlParser
-from icd_reader.wikipedia_client.WikipediaClient import WikipediaClient
+from icd_reader.icd_mapper.HtmlParser import HtmlParser
+from icd_reader.icd_mapper.WikipediaClient import WikipediaClient
 
 
 class TestHtmlParser(TestCase):

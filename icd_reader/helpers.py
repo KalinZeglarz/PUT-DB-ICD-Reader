@@ -1,6 +1,14 @@
-def add_http_parameters(url: str, params: dict) -> str:
-    """Adds HTTP parameters to url"""
+"""Contains helper functions."""
 
+
+def add_http_parameters(url: str, params: dict) -> str:
+    """
+    Adds HTTP parameters to url.
+
+    :param url: url address
+    :param params: http parameters
+    :return: url with added http parameters
+    """
     result: str = url + '?'
     params_added: int = 0
     for param in params:

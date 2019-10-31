@@ -1,3 +1,5 @@
+"""Contains implementation of WikipediaClient class."""
+
 import http.client
 import json
 
@@ -17,8 +19,12 @@ class WikipediaClient:
         self.http_client.close()
 
     def search(self, text: str) -> dict:
-        """Searches Wikipedia with given text"""
+        """
+        Searches Wikipedia with given text.
 
+        :param text: Text to be searched via wikipedia API
+        :return: Search result in JSON format
+        """
         endpoint: str = '/w/api.php'
         http_params: dict = {
             'action': 'query',
@@ -33,8 +39,12 @@ class WikipediaClient:
         return json.loads(response)
 
     def get_languages(self, title: str) -> dict:
-        """Queries wikipedia for a list of languages for given article"""
+        """
+        Queries wikipedia for a list of languages for given article.
 
+        :param title: Article title
+        :return: API response in JSON format
+        """
         endpoint: str = '/w/api.php'
         http_params: dict = {
             'action': 'query',
@@ -50,8 +60,13 @@ class WikipediaClient:
         return json.loads(response)
 
     def get_article_language_url(self, title: str, lang: str) -> str:
-        """Queries wikipedia for language url for given article"""
+        """
+        Queries wikipedia for language url for given article.
 
+        :param title: Article language in short form (e.g.: en, pl, etc.)
+        :param lang: Article language to be searched for
+        :return: Link to article in given language or empty string if not found
+        """
         endpoint: str = '/w/api.php'
         http_params: dict = {
             'action': 'query',
@@ -70,8 +85,13 @@ class WikipediaClient:
 
     @staticmethod
     def get_language_url_from_json(langlinks_response_json: dict, language: str) -> str:
-        """Extracts url for page in given language from langlinks api response"""
+        """
+        Extracts url for page in given language from langlinks api response.
 
+        :param langlinks_response_json:  Response from langlinks wikipedia query
+        :param language: Language to be searched in langlinks response
+        :return: Link to article in given language or empty string if not found
+        """
         pages: dict = langlinks_response_json['query']['pages']
         langlinks: list = []
         for page in pages.values():

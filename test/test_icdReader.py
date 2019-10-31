@@ -1,3 +1,4 @@
+"""Unit tests for IcdReader class"""
 from unittest import TestCase
 
 from icd_reader.IcdReader import IcdReader

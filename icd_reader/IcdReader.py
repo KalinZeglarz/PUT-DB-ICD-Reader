@@ -1,11 +1,13 @@
+"""Contains implementation of IcdReader class."""
+
 from wikipedia import wikipedia
 
-from icd_reader.html_parser.HtmlParser import HtmlParser
-from icd_reader.wikipedia_client.WikipediaClient import WikipediaClient
+from icd_reader.icd_mapper.HtmlParser import HtmlParser
+from icd_reader.icd_mapper.WikipediaClient import WikipediaClient
 
 
 class IcdReader:
-    """Handles readings of ICD codes and getting data bout it from wikipedia"""
+    """Handles readings of ICD codes and getting data bout it from wikipedia."""
 
     wikipedia_client: WikipediaClient
 
@@ -15,10 +17,14 @@ class IcdReader:
     def __del__(self):
         pass
 
-    def get_disease_wikipedia_data(self, icd_code: str) -> tuple:
-        """ Returns title, english and polish wikipedia articles links"""
+    def get_disease_wikipedia_data(self, icd_10_code: str) -> tuple:
+        """
+        Searches for article about disease with given ICD 10 code.
 
-        icd_code_upper: str = icd_code.upper()
+        :param icd_10_code:
+        :return: article title and link to english and polish version of article
+        """
+        icd_code_upper: str = icd_10_code.upper()
         icd_10_search_result: dict = self.wikipedia_client.search('ICD-10')
         icd_list_page_title: str = icd_10_search_result['query']['search'][0]['title']
         icd_list_page_html: str = str(wikipedia.page(icd_list_page_title).html())
