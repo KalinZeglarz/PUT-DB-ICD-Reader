@@ -30,7 +30,7 @@ class HtmlParser:
         return ''
 
     @staticmethod
-    def __find_disease_in_section(parent_element, icd_code: str) -> tuple:
+    def _find_disease_in_section(parent_element, icd_code: str) -> tuple:
         sub_disease_sections = parent_element.findAll('li')
         if sub_disease_sections is None:
             return None, None
@@ -42,7 +42,7 @@ class HtmlParser:
             disease_line = parent_element.findChildren('li', recursive=False)
             if disease_line is not None:
                 for li in disease_line:
-                    search_result = HtmlParser.__find_disease_in_section(li, icd_code)
+                    search_result = HtmlParser._find_disease_in_section(li, icd_code)
                     if search_result is not None:
                         return search_result
 
@@ -65,6 +65,6 @@ class HtmlParser:
         disease_sections: list = html_object.select('div:not(#toc) > ul')
 
         for section in disease_sections:
-            search_result: tuple = HtmlParser.__find_disease_in_section(section, icd_code.upper())
+            search_result: tuple = HtmlParser._find_disease_in_section(section, icd_code.upper())
             if search_result is not None:
                 return search_result
