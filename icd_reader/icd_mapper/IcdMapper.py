@@ -1,3 +1,5 @@
+"""Contains implementation of IcdMapper class."""
+
 import http.client
 import json
 from base64 import b64encode
@@ -6,6 +8,8 @@ from icd_reader import helpers
 
 
 class IcdMapper:
+    """Contains methods used to map ICD 10 codes to ICD 11 codes."""
+
     http_client: http.client.HTTPSConnection
     token: dict
 
@@ -68,6 +72,12 @@ class IcdMapper:
         return res_json["destinationEntities"][0]["theCode"].split("&")[0]
 
     def icd_10_to_icd_11(self, icd_10_code: str) -> str:
+        """
+        Maps ICD 10 code to ICD 11 code via WHO ICD API.
+
+        :param icd_10_code:
+        :return: ICD 11 code
+        """
         disease_name: str = self._get_icd_10_name(icd_10_code)
         icd_11_code: str = self._get_icd_11_code(disease_name)
         return icd_11_code
