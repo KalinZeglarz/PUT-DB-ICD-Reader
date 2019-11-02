@@ -2,8 +2,11 @@
 
 import http.client
 import json
+import logging
 
-from icd_reader import helpers
+from icd_reader import helpers, logger
+
+logger.initialize()
 
 
 class WikipediaClient:
@@ -12,28 +15,30 @@ class WikipediaClient:
     http_client: http.client.HTTPSConnection
 
     def __init__(self, lang: str):
-        self.http_client = http.client.HTTPSConnection(lang + '.wikipedia.org', 443)
-        pass
+        self.http_client = http.client.HTTPSConnection(lang + ".wikipedia.org", 443)
 
     def __del__(self):
         self.http_client.close()
 
-    def search(self, text: str) -> dict:
+    def search_title(self, text: str) -> dict:
         """
         Searches Wikipedia with given text.
 
         :param text: Text to be searched via wikipedia API
         :return: Search result in JSON format
         """
-        endpoint: str = '/w/api.php'
+        logging.info("Searching wikipedia for text '{0}'".format(text))
+        url: str = "/w/api.php"
         http_params: dict = {
-            'action': 'query',
-            'list': 'search',
-            'format': 'json',
-            'srsearch': text
+            "action": "query",
+            "list": "search",
+            "format": "json",
+            "srsearch": text.replace(" ", "%20"),
+            "srlimit": "1",
+            "srprop": ""
         }
-        endpoint_with_params: str = helpers.add_http_parameters(endpoint, http_params)
-        self.http_client.request('GET', endpoint_with_params)
+        url_with_params: str = helpers.add_http_parameters(url, http_params)
+        self.http_client.request("GET", url_with_params)
 
         response: bytes = self.http_client.getresponse().read()
         return json.loads(response)
@@ -45,16 +50,17 @@ class WikipediaClient:
         :param title: Article title
         :return: API response in JSON format
         """
-        endpoint: str = '/w/api.php'
+        logging.info("Searching wikipedia for languages for article with title '{0}'".format(title))
+        url: str = "/w/api.php"
         http_params: dict = {
-            'action': 'query',
-            'titles': title,
-            'prop': 'langlinks',
-            'format': 'json',
-            'llprop': 'url'
+            "action": "query",
+            "titles": title.replace(" ", "%20"),
+            "prop": "langlinks",
+            "format": "json",
+            "llprop": "url"
         }
-        endpoint_with_params: str = helpers.add_http_parameters(endpoint, http_params)
-        self.http_client.request('GET', endpoint_with_params)
+        url_with_params: str = helpers.add_http_parameters(url, http_params)
+        self.http_client.request("GET", url_with_params)
 
         response: bytes = self.http_client.getresponse().read()
         return json.loads(response)
@@ -67,17 +73,18 @@ class WikipediaClient:
         :param lang: Article language to be searched for
         :return: Link to article in given language or empty string if not found
         """
-        endpoint: str = '/w/api.php'
+        logging.info("Searching wikipedia for '{0}' language for article with title '{1}'".format(lang, title))
+        url: str = "/w/api.php"
         http_params: dict = {
-            'action': 'query',
-            'titles': title,
-            'prop': 'langlinks',
-            'format': 'json',
-            'llprop': 'url',
-            'lllang': lang
+            "action": "query",
+            "titles": title.replace(" ", "%20"),
+            "prop": "langlinks",
+            "format": "json",
+            "llprop": "url",
+            "lllang": lang
         }
-        endpoint_with_params: str = helpers.add_http_parameters(endpoint, http_params)
-        self.http_client.request('GET', endpoint_with_params)
+        url_with_params: str = helpers.add_http_parameters(url, http_params)
+        self.http_client.request("GET", url_with_params)
 
         response: bytes = self.http_client.getresponse().read()
 
@@ -92,11 +99,11 @@ class WikipediaClient:
         :param language: Language to be searched in langlinks response
         :return: Link to article in given language or empty string if not found
         """
-        pages: dict = langlinks_response_json['query']['pages']
+        pages: dict = langlinks_response_json["query"]["pages"]
         langlinks: list = []
         for page in pages.values():
-            langlinks = page['langlinks']
+            langlinks = page["langlinks"]
         for langlink in langlinks:
-            if langlink['lang'] == language:
-                return langlink['url']
-        return ''
+            if langlink["lang"] == language:
+                return langlink["url"]
+        return ""

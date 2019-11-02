@@ -1,0 +1,92 @@
+{
+  "codeSpaces": [
+    {
+      "codeSpace": "A00-B99",
+      "wikipediaChapter": "I"
+    },
+    {
+      "codeSpace": "C00-D48",
+      "wikipediaChapter": "II"
+    },
+    {
+      "codeSpace": "D50-D89",
+      "wikipediaChapter": "III"
+    },
+    {
+      "codeSpace": "E00-E90",
+      "wikipediaChapter": "IV"
+    },
+    {
+      "codeSpace": "F00-F99",
+      "wikipediaChapter": "V"
+    },
+    {
+      "codeSpace": "G00-G99",
+      "wikipediaChapter": "VI"
+    },
+    {
+      "codeSpace": "H00-H59",
+      "wikipediaChapter": "VII"
+    },
+    {
+      "codeSpace": "H60-H95",
+      "wikipediaChapter": "VIII"
+    },
+    {
+      "codeSpace": "I00-I99",
+      "wikipediaChapter": "IX"
+    },
+    {
+      "codeSpace": "J00-J99",
+      "wikipediaChapter": "X"
+    },
+    {
+      "codeSpace": "K00-K93",
+      "wikipediaChapter": "XI"
+    },
+    {
+      "codeSpace": "L00-L99",
+      "wikipediaChapter": "XII"
+    },
+    {
+      "codeSpace": "M00-M99",
+      "wikipediaChapter": "XIII"
+    },
+    {
+      "codeSpace": "N00-N99",
+      "wikipediaChapter": "XIV"
+    },
+    {
+      "codeSpace": "O00-O99",
+      "wikipediaChapter": "XV"
+    },
+    {
+      "codeSpace": "P00-P96",
+      "wikipediaChapter": "XVI"
+    },
+    {
+      "codeSpace": "Q00-Q99",
+      "wikipediaChapter": "XVII"
+    },
+    {
+      "codeSpace": "R00-R99",
+      "wikipediaChapter": "XVIII"
+    },
+    {
+      "codeSpace": "S00-T98",
+      "wikipediaChapter": "XIX"
+    },
+    {
+      "codeSpace": "V01-Y98",
+      "wikipediaChapter": "XX"
+    },
+    {
+      "codeSpace": "Z00-Z99",
+      "wikipediaChapter": "XXI"
+    },
+    {
+      "codeSpace": "U00-U99",
+      "wikipediaChapter": "XXII"
+    }
+  ]
+}
