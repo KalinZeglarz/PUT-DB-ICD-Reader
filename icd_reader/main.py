@@ -12,7 +12,6 @@ logger.initialize()
 def _load_configuration():
     global configuration
 
-    # Read JSON data into the datastore variable
     with open('resources/configuration.json', 'r') as f:
         configuration = json.load(f)
         logging.info("Loaded configuration from path 'resources/configuration.json'")
