@@ -13,7 +13,7 @@ from icd_reader.classes.WikipediaClient import WikipediaClient
 logger.initialize()
 
 
-class IcdReader:
+class IcdWikipediaMapper:
     """Handles readings of ICD codes and getting data bout it from wikipedia."""
 
     wikipedia_client: WikipediaClient
