@@ -1,19 +1,41 @@
-import http.client
-import json
+"""Unit tests for WikipediaClient class"""
 from unittest import TestCase
 
-from icd_reader.wikipedia_client.WikipediaClient import WikipediaClient
+from icd_reader.classes.WikipediaClient import WikipediaClient
 
 
 class TestWikipediaClient(TestCase):
     def test_constructor(self):
-        wikipedia_client = WikipediaClient('pl')
+        wikipedia_client = WikipediaClient("pl")
+
         self.assertIsNotNone(wikipedia_client)
 
     def test_search(self):
-        wikipedia_client = WikipediaClient('pl')
-        response: http.client.HTTPResponse = wikipedia_client.search("ICD-10%20i40")
+        wikipedia_client = WikipediaClient("pl")
+        response: dict = wikipedia_client.search_title("ICD-10 I40")
+
         self.assertIsNotNone(response)
-        parsed_response_content: dict = json.loads(response.read())
-        self.assertIsNotNone(parsed_response_content['query']['search'])
-        print(parsed_response_content['query']['search'])
+        self.assertIsNotNone(response["query"]["search"])
+
+    def test_get_languages(self):
+        wikipedia_client = WikipediaClient("en")
+        languages_json = wikipedia_client.get_languages("ICD-10")
+        pages: dict = languages_json["query"]["pages"]
+        langlinks: list = []
+        for page in pages.values():
+            langlinks = page["langlinks"]
+
+        self.assertEqual(10, len(langlinks))
+
+    def test_get_language_url_from_json(self):
+        wikipedia_client = WikipediaClient("en")
+        languages_json = wikipedia_client.get_languages("Grigori Rasputin")
+        language_url: str = WikipediaClient.get_language_url_from_json(languages_json, "be")
+
+        self.assertTrue("https://be.wikipedia.org/" in language_url)
+
+    def test_get_article_language_url(self):
+        wikipedia_client = WikipediaClient("en")
+        language_url: str = wikipedia_client.get_article_language_url("ICD-10", "pl")
+
+        self.assertTrue("https://pl.wikipedia.org/" in language_url)
