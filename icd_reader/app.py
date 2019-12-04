@@ -1,7 +1,7 @@
 import json
 import logging
 
-from flask import Flask, request
+from flask import Flask, request, Response
 
 from icd_reader import logger
 from icd_reader.classes.DbController import DbController
@@ -47,6 +47,10 @@ def icd_reader():
 
 @app.route('/map/icd-10', methods=['POST', 'PUT'])
 def add_or_update():
+    global icd_mapper
+    global db_controller
+    global wikipedia_mapper
+
     input_data: list = request.get_json()['data']
     for icd10_code in input_data:
         icd11_code: str = icd_mapper.icd_10_to_icd_11(icd10_code)
@@ -56,6 +60,7 @@ def add_or_update():
         id_disease: int = db_controller.get_disease_id(disease_name)
         db_controller.add_icd_codes(id_disease, icd_mapper.split_icd_10_code(icd10_code), icd11_code)
         db_controller.add_wiki_info(id_disease, eng_title, '', eng_url, pol_url)
+    return Response(status=201)
 
 
 @app.route('/icd-10/<code>', methods=['GET'])
@@ -79,7 +84,8 @@ def get_icd11_sub(code: str, subcode: str):
 
 
 if __name__ == '__main__':
+    _load_configuration()
     app.run(
-        host='localhost',
+        host='0.0.0.0',
         port=80
     )
