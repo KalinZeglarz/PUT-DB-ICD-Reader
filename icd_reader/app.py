@@ -5,11 +5,9 @@ from flask import Flask, request
 
 from icd_reader import logger
 from icd_reader.classes.DbController import DbController
-from icd_reader.classes.HtmlParser import HtmlParser
 from icd_reader.classes.IcdMapper import IcdMapper
 from icd_reader.classes.IcdWikipediaMapper import IcdWikipediaMapper
 from icd_reader.classes.MySqlController import MySqlController
-from icd_reader.classes.WikipediaClient import WikipediaClient
 
 logger.initialize()
 
@@ -82,6 +80,6 @@ def get_icd11_sub(code: str, subcode: str):
 
 if __name__ == '__main__':
     app.run(
-        host='locahost',
+        host='localhost',
         port=80
     )
