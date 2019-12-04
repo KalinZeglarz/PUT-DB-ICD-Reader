@@ -41,7 +41,7 @@ class IcdMapper:
         res = self.http_client.getresponse()
         self.token = json.loads(res.read())
 
-    def _get_icd_10_name(self, icd_10_code: str) -> str:
+    def get_icd_10_name(self, icd_10_code: str) -> str:
         headers = {
             "accept": "application/json",
             "Accept-Language": "en",
@@ -81,8 +81,14 @@ class IcdMapper:
         :param icd_10_code:
         :return: ICD 11 code
         """
-        disease_name: str = self._get_icd_10_name(icd_10_code)
+        disease_name: str = self.get_icd_10_name(icd_10_code)
         logging.info("Disease name for ICD 10 code '{0}' is '{1}'".format(icd_10_code, disease_name))
         icd_11_code: str = self._get_icd_11_code(disease_name)
         logging.info("Mapped ICD 10 code '{0}' to ICD 11 code '{1}'".format(icd_10_code, icd_11_code))
         return icd_11_code
+
+    def split_icd_10_code(self, icd_10_code: str) -> list:
+        result: list = icd_10_code.split('.')
+        while len(result) < 3:
+            result.append('')
+        return result

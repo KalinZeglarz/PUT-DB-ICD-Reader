@@ -102,7 +102,8 @@ class WikipediaClient:
         pages: dict = langlinks_response_json["query"]["pages"]
         langlinks: list = []
         for page in pages.values():
-            langlinks = page["langlinks"]
+            if "langlinks" in page:
+                langlinks = page["langlinks"]
         for langlink in langlinks:
             if langlink["lang"] == language:
                 return langlink["url"]

@@ -2,5 +2,10 @@
   "icd-api-credentials": {
     "client-id": "74009638-34b6-4960-b9f0-2ed5acd08e71_fa0bcb22-3fa7-4149-8427-82891d884572",
     "client-secret": "qfRSgmvnd7b6NBvYB3NAs0UwIPEU3pXAiFQODGMFhb8="
+  },
+  "db-parameters": {
+    "host": "localhost",
+    "user": "root",
+    "password": "root"
   }
 }
