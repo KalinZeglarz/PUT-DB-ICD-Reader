@@ -65,22 +65,12 @@ def add_or_update():
 
 @app.route('/icd-10/<code>', methods=['GET'])
 def get_icd10(code: str):
-    return 'Im icd-10 {}'.format(code)
-
-
-@app.route('/icd-10/<code>/<subcode>', methods=['GET'])
-def get_icd10_sub(code: str, subcode: str):
-    return 'Im icd-10 {}'.format(code + " " + subcode)
+    return db_controller.get_icd_10_info(code)
 
 
 @app.route('/icd-11/<code>', methods=['GET'])
 def get_icd11(code: str):
-    return 'Im icd-11 {}'.format(code)
-
-
-@app.route('/icd-11/<code>/<subcode>', methods=['GET'])
-def get_icd11_sub(code: str, subcode: str):
-    return 'Im icd-11 {}'.format(code + " " + subcode)
+    return db_controller.get_icd_11_info(code)
 
 
 if __name__ == '__main__':
