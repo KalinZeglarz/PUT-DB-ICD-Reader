@@ -54,8 +54,6 @@ class TestMySqlController(TestCase):
                 }
             ]
         }
-        print(expected_disease_info)
-        print(disease_info)
         self.assertDictEqual(expected_disease_info, disease_info)
 
     def test_get_icd11_info(self):
