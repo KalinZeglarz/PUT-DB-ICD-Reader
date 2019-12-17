@@ -42,7 +42,10 @@ class MySqlController(DbController):
         cursor.execute("SELECT ID_DISEASE FROM DISEASES WHERE NAME='{0}';".format(name))
         id_disease = cursor.fetchall()
         cursor.close()
-        return int(id_disease[0][0])
+        if len(id_disease) == 0:
+            return -1
+        else:
+            return int(id_disease[0][0])
 
     def get_disease_id_by_icd10(self, icd10: str) -> int:
         """
@@ -59,7 +62,10 @@ class MySqlController(DbController):
         )
         id_disease = cursor.fetchall()
         cursor.close()
-        return int(id_disease[0][0])
+        if len(id_disease) == 0:
+            return -1
+        else:
+            return int(id_disease[0][0])
 
     def get_disease_id_by_icd11(self, icd11: str) -> int:
         """
@@ -72,7 +78,10 @@ class MySqlController(DbController):
         )
         id_disease = cursor.fetchall()
         cursor.close()
-        return int(id_disease[0][0])
+        if len(id_disease) == 0:
+            return -1
+        else:
+            return int(id_disease[0][0])
 
     def add_wiki_info(self, id_disease: int, language: str, title: str, link: str):
         """
@@ -137,12 +146,7 @@ class MySqlController(DbController):
         disease_info = cursor.fetchall()
         cursor.close()
         if len(disease_info) == 0:
-            return {
-                'icd10': None,
-                'icd11': None,
-                'diseaseName': None,
-                'wikipedia': []
-            }
+            return {}
         else:
             return {
                 'icd10': icd10_code,
@@ -162,12 +166,7 @@ class MySqlController(DbController):
         disease_info = cursor.fetchall()
         cursor.close()
         if len(disease_info) == 0:
-            return {
-                'icd10': None,
-                'icd11': None,
-                'diseaseName': None,
-                'wikipedia': []
-            }
+            return {}
         else:
             icd10_code: str = ''
             if disease_info[0][1] != '':
