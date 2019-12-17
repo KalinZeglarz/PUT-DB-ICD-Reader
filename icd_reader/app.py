@@ -2,6 +2,7 @@ import json
 import logging
 
 from flask import Flask, request, Response
+from flask_restplus import Resource, Api
 
 from icd_reader import logger
 from icd_reader.classes.DbController import DbController
@@ -12,6 +13,9 @@ from icd_reader.classes.MySqlController import MySqlController
 logger.initialize()
 
 app = Flask(__name__)
+api = Api(app, version='1.0', title='ICD READER API',
+          description='An API for ICD READER')
+ns_reader = api.namespace('icd-reader', description='')
 
 icd_mapper: IcdMapper
 
@@ -40,13 +44,13 @@ def _load_configuration():
     wikipedia_mapper = IcdWikipediaMapper("resources/codeSpaces.json")
 
 
-@app.route('/')
+@ns_reader.route('/')
 def icd_reader():
     return 'This is ICD Reader'
 
 
 # noinspection DuplicatedCode
-@app.route('/map/icd-10', methods=['POST', 'PUT'])
+@ns_reader.route('/map/icd-10', methods=['POST', 'PUT'])
 def add_or_update():
     global icd_mapper
     global db_controller
@@ -66,7 +70,7 @@ def add_or_update():
 
 
 # noinspection DuplicatedCode
-@app.route('/icd-10/<code>', methods=['GET'])
+@ns_reader.route('/icd-10/<code>', methods=['GET'])
 def get_icd10(code: str):
     response_format: str = request.args.get('format')
     result: dict = db_controller.get_icd_10_info(code)
@@ -79,7 +83,7 @@ def get_icd10(code: str):
 
 
 # noinspection DuplicatedCode
-@app.route('/icd-11/<code>', methods=['GET'])
+@ns_reader.route('/icd-11/<code>', methods=['GET'])
 def get_icd11(code: str):
     response_format: str = request.args.get('format')
     result: dict = db_controller.get_icd_11_info(code)
