@@ -45,6 +45,7 @@ def icd_reader():
     return 'This is ICD Reader'
 
 
+# noinspection DuplicatedCode
 @app.route('/map/icd-10', methods=['POST', 'PUT'])
 def add_or_update():
     global icd_mapper
@@ -59,18 +60,35 @@ def add_or_update():
         db_controller.add_disease_entry(disease_name)
         id_disease: int = db_controller.get_disease_id_by_name(disease_name)
         db_controller.add_icd_codes(id_disease, icd_mapper.split_icd_10_code(icd10_code), icd11_code)
-        db_controller.add_wiki_info(id_disease, eng_title, '', eng_url, pol_url)
+        db_controller.add_wiki_info(id_disease, 'eng', eng_title, eng_url)
+        db_controller.add_wiki_info(id_disease, 'pol', '', pol_url)
     return Response(status=201)
 
 
+# noinspection DuplicatedCode
 @app.route('/icd-10/<code>', methods=['GET'])
 def get_icd10(code: str):
-    return db_controller.get_icd_10_info(code)
+    response_format: str = request.args.get('format')
+    result: dict = db_controller.get_icd_10_info(code)
+    if response_format == "html":
+        return Response("<h1>Not implemented yet!</h1>", status=200, mimetype='text/html')
+    if response_format == "json-pretty":
+        return Response(response=json.dumps(result, indent=3), status=200, mimetype='application/json')
+    else:
+        return Response(response=json.dumps(result), status=200, mimetype='application/json')
 
 
+# noinspection DuplicatedCode
 @app.route('/icd-11/<code>', methods=['GET'])
 def get_icd11(code: str):
-    return db_controller.get_icd_11_info(code)
+    response_format: str = request.args.get('format')
+    result: dict = db_controller.get_icd_11_info(code)
+    if response_format == "html":
+        return Response("<h1>Not implemented yet!</h1>", status=200, mimetype='text/html')
+    if response_format == "json-pretty":
+        return Response(response=json.dumps(result, indent=3), status=200, mimetype='application/json')
+    else:
+        return Response(response=json.dumps(result), status=200, mimetype='application/json')
 
 
 if __name__ == '__main__':
