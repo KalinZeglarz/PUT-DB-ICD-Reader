@@ -85,9 +85,10 @@ def _main():
             disease_name: str = icd_mapper.get_icd_10_name(icd10_code)
             eng_title, eng_url, pol_url = wikipedia_mapper.get_disease_wikipedia_data(icd10_code)
             db_controller.add_disease_entry(disease_name)
-            id_disease: int = db_controller.get_disease_id(disease_name)
+            id_disease: int = db_controller.get_disease_id_by_name(disease_name)
             db_controller.add_icd_codes(id_disease, icd_mapper.split_icd_10_code(icd10_code), icd11_code)
-            db_controller.add_wiki_info(id_disease, eng_title, '', eng_url, pol_url)
+            db_controller.add_wiki_info(id_disease, 'eng', eng_title, eng_url)
+            db_controller.add_wiki_info(id_disease, 'pol', '', pol_url)
 
 
 if __name__ == "__main__":

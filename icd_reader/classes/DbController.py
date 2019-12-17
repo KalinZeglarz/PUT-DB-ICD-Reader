@@ -22,7 +22,7 @@ class DbController:
         pass
 
     @abstractmethod
-    def get_disease_id(self, name: str) -> int:
+    def get_disease_id_by_name(self, name: str) -> int:
         """
         :param name: Disease name
         :return: id of disease with given name
@@ -30,13 +30,49 @@ class DbController:
         pass
 
     @abstractmethod
-    def add_wiki_info(self, id_disease: int, eng_title: str, pl_title: str, eng_link: str, pl_link: str):
+    def get_disease_id_by_icd10(self, icd10: str) -> int:
+        """
+        :param icd10:
+        :return: id of disease with given icd10 code
+        """
+        pass
+
+    @abstractmethod
+    def get_disease_id_by_icd11(self, icd11: str) -> int:
+        """
+        :param icd11:
+        :return: id of disease with given icd11 code
+        """
+        pass
+
+    @abstractmethod
+    def add_wiki_info(self, id_disease: int, language: str, title: str, link: str):
+        """
+        :param language:
+        :param title:
+        :param link:
+        :param id_disease:
+        """
+        pass
+
+    @abstractmethod
+    def get_wiki_info(self, id_disease: int) -> list:
         """
         :param id_disease:
-        :param eng_title:
-        :param pl_title:
-        :param eng_link:
-        :param pl_link:
+        """
+        pass
+
+    @abstractmethod
+    def get_icd_10_info(self, icd10_code: str) -> dict:
+        """
+        :param icd10_code:
+        """
+        pass
+
+    @abstractmethod
+    def get_icd_11_info(self, icd11_code: str) -> dict:
+        """
+        :param icd11_code:
         """
         pass
 

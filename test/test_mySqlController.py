@@ -24,13 +24,58 @@ class TestMySqlController(TestCase):
         self.db_controller.add_disease_entry('unit_test')
 
     def test_get_disease_id(self):
-        id_disease: int = self.db_controller.get_disease_id('unit_test')
+        id_disease: int = self.db_controller.get_disease_id_by_name('unit_test')
         self.assertIsNotNone(id_disease)
 
     def test_add_wiki_info(self):
-        id_disease: int = self.db_controller.get_disease_id('unit_test')
-        self.db_controller.add_wiki_info(id_disease, 'eng_title', 'pol_title', 'eng_url', 'pol_url')
+        id_disease: int = self.db_controller.get_disease_id_by_name('unit_test')
+        self.db_controller.add_wiki_info(id_disease, 'eng', 'eng_title', 'eng_url')
+        self.db_controller.add_wiki_info(id_disease, 'pol', 'pol_title', 'pol_url')
 
     def test_add_icd_codes(self):
-        id_disease: int = self.db_controller.get_disease_id('unit_test')
+        id_disease: int = self.db_controller.get_disease_id_by_name('unit_test')
         self.db_controller.add_icd_codes(id_disease, ['unit', 'test', 'in'], 'code11')
+
+    def test_get_icd10_info(self):
+        disease_info: dict = self.db_controller.get_icd_10_info('unit.test.in')
+        expected_disease_info: dict = {
+            'icd10': 'unit.test.in',
+            'icd11': 'code11',
+            'diseaseName': 'unit_test',
+            'wikipedia': [
+                {
+                    'lang': 'eng',
+                    'title': 'eng_title',
+                    'link': 'eng_url'
+                }, {
+                    'lang': 'pol',
+                    'title': 'pol_title',
+                    'link': 'pol_url'
+                }
+            ]
+        }
+        print(expected_disease_info)
+        print(disease_info)
+        self.assertDictEqual(expected_disease_info, disease_info)
+
+    def test_get_icd11_info(self):
+        disease_info: dict = self.db_controller.get_icd_11_info('code11')
+        expected_disease_info: dict = {
+            'icd10': 'unit.test.in',
+            'icd11': 'code11',
+            'diseaseName': 'unit_test',
+            'wikipedia': [
+                {
+                    'lang': 'eng',
+                    'title': 'eng_title',
+                    'link': 'eng_url'
+                }, {
+                    'lang': 'pol',
+                    'title': 'pol_title',
+                    'link': 'pol_url'
+                }
+            ]
+        }
+        print(expected_disease_info)
+        print(disease_info)
+        self.assertDictEqual(expected_disease_info, disease_info)
