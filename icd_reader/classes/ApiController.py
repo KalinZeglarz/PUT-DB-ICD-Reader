@@ -41,6 +41,9 @@ def add_or_update_icd10(request) -> Response:
     global db_controller
     global wikipedia_mapper
 
+    if 'data' not in request.get_json():
+        return Response(status=400)
+
     input_data: list = request.get_json()['data']
     for icd10_code in input_data:
         icd11_code: str = icd_mapper.icd_10_to_icd_11(icd10_code)
@@ -61,8 +64,6 @@ def get_icd10(request, code: str):
     if result == {}:
         return Response(status=404)
 
-    if response_format == "html":
-        return Response("<h1>Not implemented yet!</h1>", status=200, mimetype='text/html')
     if response_format == "json-pretty":
         return Response(response=json.dumps(result, indent=3), status=200, mimetype='application/json')
     else:
@@ -75,9 +76,44 @@ def get_icd11(request, code: str):
     if result == {}:
         return Response(status=404)
 
-    if response_format == "html":
-        return Response("<h1>Not implemented yet!</h1>", status=200, mimetype='text/html')
     if response_format == "json-pretty":
         return Response(response=json.dumps(result, indent=3), status=200, mimetype='application/json')
     else:
         return Response(response=json.dumps(result), status=200, mimetype='application/json')
+
+
+def get_disease(request, id_disease: int):
+    response_format: str = request.args.get('format')
+    result: dict = db_controller.get_disease_info([id_disease])
+    if result == {}:
+        return Response(status=404)
+
+    if response_format == "json-pretty":
+        return Response(response=json.dumps(result, indent=3), status=200, mimetype='application/json')
+    else:
+        return Response(response=json.dumps(result), status=200, mimetype='application/json')
+
+
+def add_additional_info(request) -> Response:
+    data: dict = request.get_json()
+
+    if not {'diseaseId', 'type', 'author', 'info'} <= request.get_json().keys():
+        return Response(status=400)
+
+    db_controller.add_additional_info(data['diseaseId'], data['type'], data['author'], data['info'])
+    return Response(status=201)
+
+
+def modify_additional_info(request) -> Response:
+    data: dict = request.get_json()
+
+    if not {'infoId', 'type', 'author', 'info'} <= request.get_json().keys():
+        return Response(status=400)
+
+    db_controller.modify_additional_info(data['infoId'], data['type'], data['author'], data['info'])
+    return Response(status=201)
+
+
+def delete_additional_info(id_disease: int) -> Response:
+    db_controller.delete_additional_info(id_disease)
+    return Response(status=200)

@@ -2,6 +2,7 @@
 import json
 import logging
 import sys
+from datetime import datetime
 
 from icd_reader import logger
 from icd_reader.classes.DbController import DbController
@@ -29,6 +30,7 @@ def _input_argument() -> list:
         if sys.argv[arg_index + 1].lower() == "json":
             file = open(sys.argv[arg_index + 2], 'r')
             input_json: dict = json.load(file.read())
+            file.close()
             for code in input_json['codes']:
                 input_data.append(code)
         elif sys.argv[arg_index + 1].lower() == "argument":
@@ -49,6 +51,11 @@ def _mode_argument() -> str:
             return 'icd11-icd10'
         elif sys.argv[arg_index + 1].lower() == "save-to-db":
             return 'save-to-db'
+        elif sys.argv[arg_index + 1].lower() == "prolog":
+            return 'prolog'
+        else:
+            print("ERROR: unrecognized '--mode' value", file=sys.stderr)
+            sys.exit(1)
     else:
         print("ERROR: missing '--mode' argument", file=sys.stderr)
         sys.exit(1)
@@ -70,15 +77,17 @@ def _main():
     input_data: list = []
     mode: str
 
-    # input data argument (required)
-    input_data = _input_argument()
-
     # mode argument (required)
     mode = _mode_argument()
+
+    # input data argument
+    if mode != 'prolog':
+        input_data = _input_argument()
 
     if mode == 'icd10-icd11':
         for icd10_code in input_data:
             print(icd_mapper.icd_10_to_icd_11(icd10_code))
+
     elif mode == 'save-to-db':
         for icd10_code in input_data:
             icd11_code: str = icd_mapper.icd_10_to_icd_11(icd10_code)
@@ -89,6 +98,14 @@ def _main():
             db_controller.add_icd_codes(id_disease, icd_mapper.split_icd_10_code(icd10_code), icd11_code)
             db_controller.add_wiki_info(id_disease, 'eng', eng_title, eng_url)
             db_controller.add_wiki_info(id_disease, 'pol', '', pol_url)
+
+    elif mode == 'prolog':
+        date_time_obj = datetime.now()
+        timestamp_str: str = date_time_obj.strftime("%d-%b-%Y_%H-%M-%S")
+
+        file = open('prolog_{0}.pl'.format(timestamp_str), 'w+')
+        file.write(db_controller.export_to_prolog())
+        file.close()
 
 
 if __name__ == "__main__":
