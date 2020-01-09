@@ -30,7 +30,7 @@ class DbController:
         pass
 
     @abstractmethod
-    def get_disease_id_by_icd10(self, icd10: str) -> int:
+    def get_disease_id_by_icd10(self, icd10: str) -> list:
         """
         :param icd10:
         :return: id of disease with given icd10 code
@@ -38,7 +38,7 @@ class DbController:
         pass
 
     @abstractmethod
-    def get_disease_id_by_icd11(self, icd11: str) -> int:
+    def get_disease_id_by_icd11(self, icd11: str) -> list:
         """
         :param icd11:
         :return: id of disease with given icd11 code
@@ -57,6 +57,13 @@ class DbController:
 
     @abstractmethod
     def get_wiki_info(self, id_disease: int) -> list:
+        """
+        :param id_disease:
+        """
+        pass
+
+    @abstractmethod
+    def get_disease_info(self, id_disease: list) -> dict:
         """
         :param id_disease:
         """
@@ -83,4 +90,20 @@ class DbController:
         :param icd_10_code: ICD-10 code divided into category, details and extension
         :param icd_11_code:
         """
+        pass
+
+    @abstractmethod
+    def add_additional_info(self, id_disease: int, type: str, author: str, info: str):
+        pass
+
+    @abstractmethod
+    def modify_additional_info(self, id_info: int, type: str, author: str, info: str):
+        pass
+
+    @abstractmethod
+    def delete_additional_info(self, id_info: int):
+        pass
+
+    @abstractmethod
+    def export_to_prolog(self) -> str:
         pass

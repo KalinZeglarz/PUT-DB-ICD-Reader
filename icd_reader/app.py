@@ -1,98 +1,93 @@
-import json
-import logging
-
-from flask import Flask, request, Response
+import flask_restplus
+from flask import Flask, request
+from flask_restplus import Resource
 
 from icd_reader import logger
-from icd_reader.classes.DbController import DbController
-from icd_reader.classes.IcdMapper import IcdMapper
-from icd_reader.classes.IcdWikipediaMapper import IcdWikipediaMapper
-from icd_reader.classes.MySqlController import MySqlController
+from icd_reader.classes import ApiController
+from icd_reader.classes.ApiModels import ApiModels
 
 logger.initialize()
 
 app = Flask(__name__)
+api = flask_restplus.Api(app, version='1.0', title='ICD READER API', description='An API for ICD READER')
+ns_reader = api.namespace('icd-reader', description='')
+ns_additional_info = api.namespace('icd-reader/additional-info', description='')
 
-icd_mapper: IcdMapper
-
-db_controller: DbController
-
-wikipedia_mapper: IcdWikipediaMapper
-
-
-def _load_configuration():
-    global icd_mapper
-    global db_controller
-    global wikipedia_mapper
-
-    with open('resources/configuration.json', 'r') as f:
-        configuration = json.load(f)
-        logging.info("Loaded configuration from path 'resources/configuration.json'")
-    db_controller = MySqlController(
-        host=configuration['db-parameters']['host'],
-        user=configuration['db-parameters']['user'],
-        password=configuration['db-parameters']['password']
-    )
-    icd_mapper = IcdMapper(
-        client_id=configuration['icd-api-credentials']['client-id'],
-        client_secret=configuration['icd-api-credentials']['client-secret']
-    )
-    wikipedia_mapper = IcdWikipediaMapper("resources/codeSpaces.json")
+models: ApiModels = ApiModels(api)
 
 
-@app.route('/')
-def icd_reader():
-    return 'This is ICD Reader'
+@ns_reader.route('/map/icd-10')
+@ns_reader.expect(models.map_post_put_body)
+@ns_reader.response(201, 'Created')
+@ns_reader.response(400, 'Bad Request')
+@ns_reader.response(500, 'Internal Server Error')
+class MapIcd10(Resource):
+    def post(self):
+        return ApiController.add_or_update_icd10(request)
+
+    def put(self):
+        return ApiController.add_or_update_icd10(request)
+
+
+@ns_reader.route('/icd-10/<code>')
+@ns_reader.doc(params={'code': 'An ICD-10 code'})
+@ns_reader.response(200, 'Success')
+@ns_reader.response(404, 'Not Found')
+@ns_reader.response(500, 'Internal Server Error')
+class GetIcd10(Resource):
+    @ns_reader.doc(params={'format': 'Response data format (json, json-pretty)'})
+    def get(self, code: str):
+        return ApiController.get_icd10(request, code)
 
 
 # noinspection DuplicatedCode
-@app.route('/map/icd-10', methods=['POST', 'PUT'])
-def add_or_update():
-    global icd_mapper
-    global db_controller
-    global wikipedia_mapper
-
-    input_data: list = request.get_json()['data']
-    for icd10_code in input_data:
-        icd11_code: str = icd_mapper.icd_10_to_icd_11(icd10_code)
-        disease_name: str = icd_mapper.get_icd_10_name(icd10_code)
-        eng_title, eng_url, pol_url = wikipedia_mapper.get_disease_wikipedia_data(icd10_code)
-        db_controller.add_disease_entry(disease_name)
-        id_disease: int = db_controller.get_disease_id_by_name(disease_name)
-        db_controller.add_icd_codes(id_disease, icd_mapper.split_icd_10_code(icd10_code), icd11_code)
-        db_controller.add_wiki_info(id_disease, 'eng', eng_title, eng_url)
-        db_controller.add_wiki_info(id_disease, 'pol', '', pol_url)
-    return Response(status=201)
+@ns_reader.route('/icd-11/<code>')
+@ns_reader.doc(params={'code': 'An ICD-11 code'})
+@ns_reader.response(200, 'Success')
+@ns_reader.response(404, 'Not Found')
+@ns_reader.response(500, 'Internal Server Error')
+class GetIcd11(Resource):
+    @ns_reader.doc(params={'format': 'Response data format (json, json-pretty)'})
+    def get(self, code: str):
+        return ApiController.get_icd11(request, code)
 
 
 # noinspection DuplicatedCode
-@app.route('/icd-10/<code>', methods=['GET'])
-def get_icd10(code: str):
-    response_format: str = request.args.get('format')
-    result: dict = db_controller.get_icd_10_info(code)
-    if response_format == "html":
-        return Response("<h1>Not implemented yet!</h1>", status=200, mimetype='text/html')
-    if response_format == "json-pretty":
-        return Response(response=json.dumps(result, indent=3), status=200, mimetype='application/json')
-    else:
-        return Response(response=json.dumps(result), status=200, mimetype='application/json')
+@ns_reader.route('/disease/<id>')
+@ns_reader.doc(params={'id': 'Internal disease ID'})
+@ns_reader.response(200, 'Success')
+@ns_reader.response(404, 'Not Found')
+@ns_reader.response(500, 'Internal Server Error')
+class GetDisease(Resource):
+    @ns_reader.doc(params={'format': 'Response data format (json, json-pretty)'})
+    def get(self, id: int):
+        return ApiController.get_disease(request, id)
 
 
-# noinspection DuplicatedCode
-@app.route('/icd-11/<code>', methods=['GET'])
-def get_icd11(code: str):
-    response_format: str = request.args.get('format')
-    result: dict = db_controller.get_icd_11_info(code)
-    if response_format == "html":
-        return Response("<h1>Not implemented yet!</h1>", status=200, mimetype='text/html')
-    if response_format == "json-pretty":
-        return Response(response=json.dumps(result, indent=3), status=200, mimetype='application/json')
-    else:
-        return Response(response=json.dumps(result), status=200, mimetype='application/json')
+@ns_additional_info.route('/')
+@ns_additional_info.response(201, 'Created')
+@ns_additional_info.response(400, 'Bad Request')
+@ns_additional_info.response(500, 'Internal Server Error')
+class AdditionalInfo(Resource):
+    @ns_additional_info.expect(models.additional_info_post_body)
+    def post(self):
+        return ApiController.add_additional_info(request)
+
+    @ns_additional_info.expect(models.additional_info_put_body)
+    def put(self):
+        return ApiController.modify_additional_info(request)
+
+
+@ns_additional_info.route('/<id>')
+@ns_additional_info.response(200, 'Success')
+@ns_additional_info.response(500, 'Internal Server Error')
+class AdditionalInfo(Resource):
+    def delete(self, id: int):
+        return ApiController.delete_additional_info(id)
 
 
 if __name__ == '__main__':
-    _load_configuration()
+    ApiController.load_configuration()
     app.run(
         host='0.0.0.0',
         port=80
