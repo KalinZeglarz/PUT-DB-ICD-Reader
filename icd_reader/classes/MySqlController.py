@@ -162,7 +162,7 @@ class MySqlController(DbController):
             })
         return result
 
-    def get_disease_info(self, id_diseases: list) -> dict:
+    def get_disease_info(self, id_diseases: list) -> list:
         diseases_info: list = []
         cursor = self.database.cursor()
         for id_disease in id_diseases:
@@ -175,9 +175,9 @@ class MySqlController(DbController):
             diseases_info.append(cursor.fetchall())
         cursor.close()
         if len(diseases_info) == 0:
-            return {}
+            return []
         else:
-            result: dict = {"diseases": []}
+            result: list = []
             for disease_info in diseases_info:
                 icd10_code: str = ''
                 if disease_info[0][1] != '':
@@ -186,7 +186,7 @@ class MySqlController(DbController):
                         icd10_code += '.' + disease_info[0][2]
                         if disease_info[0][3] != '':
                             icd10_code += '.' + disease_info[0][3]
-                result["diseases"].append({
+                result.append({
                     'diseaseId': disease_info[0][0],
                     'diseaseName': disease_info[0][4],
                     'codes': {
@@ -198,11 +198,11 @@ class MySqlController(DbController):
                 })
             return result
 
-    def get_icd_10_info(self, icd10_code: str) -> dict:
+    def get_icd_10_info(self, icd10_code: str) -> list:
         id_diseases: list = self.get_disease_id_by_icd10(icd10_code)
         return self.get_disease_info(id_diseases)
 
-    def get_icd_11_info(self, icd11_code: str) -> dict:
+    def get_icd_11_info(self, icd11_code: str) -> list:
         id_disease: list = self.get_disease_id_by_icd11(icd11_code)
         return self.get_disease_info(id_disease)
 

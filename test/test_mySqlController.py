@@ -37,10 +37,12 @@ class TestMySqlController(TestCase):
         self.db_controller.add_icd_codes(id_disease, ['unit', 'test', 'in'], 'code11')
 
     def test_get_icd10_info(self):
-        disease_info: dict = self.db_controller.get_icd_10_info('unit.test.in')
+        disease_info: list = self.db_controller.get_icd_10_info('unit.test.in')
         expected_disease_info: dict = {
-            'icd10': 'unit.test.in',
-            'icd11': 'code11',
+            "codes": {
+                'icd10': 'unit.test.in',
+                'icd11': 'code11'
+            },
             'diseaseName': 'unit_test',
             'wikipedia': [
                 {
@@ -52,15 +54,20 @@ class TestMySqlController(TestCase):
                     'title': 'pol_title',
                     'link': 'pol_url'
                 }
-            ]
+            ],
+            "additionalInfo": []
         }
-        self.assertDictEqual(expected_disease_info, disease_info)
+        self.assertDictEqual(expected_disease_info["codes"], disease_info[0]["codes"])
+        self.assertEquals(expected_disease_info["diseaseName"], disease_info[0]["diseaseName"])
+        self.assertListEqual(expected_disease_info["wikipedia"], disease_info[0]["wikipedia"])
 
     def test_get_icd11_info(self):
-        disease_info: dict = self.db_controller.get_icd_11_info('code11')
+        disease_info: list = self.db_controller.get_icd_11_info('code11')
         expected_disease_info: dict = {
-            'icd10': 'unit.test.in',
-            'icd11': 'code11',
+            "codes": {
+                'icd10': 'unit.test.in',
+                'icd11': 'code11'
+            },
             'diseaseName': 'unit_test',
             'wikipedia': [
                 {
@@ -72,6 +79,9 @@ class TestMySqlController(TestCase):
                     'title': 'pol_title',
                     'link': 'pol_url'
                 }
-            ]
+            ],
+            "additionalInfo": []
         }
-        self.assertDictEqual(expected_disease_info, disease_info)
+        self.assertDictEqual(expected_disease_info["codes"], disease_info[0]["codes"])
+        self.assertEquals(expected_disease_info["diseaseName"], disease_info[0]["diseaseName"])
+        self.assertListEqual(expected_disease_info["wikipedia"], disease_info[0]["wikipedia"])

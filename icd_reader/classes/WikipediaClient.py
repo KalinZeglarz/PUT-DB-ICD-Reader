@@ -13,12 +13,16 @@ class WikipediaClient:
     """Contains methods used to communicate with wikipedia API"""
 
     http_client: http.client.HTTPSConnection
+    lang: str
 
     def __init__(self, lang: str):
-        self.http_client = http.client.HTTPSConnection(lang + ".wikipedia.org", 443)
+        self.lang = lang
 
     def __del__(self):
         self.http_client.close()
+
+    def _connect_http_client(self):
+        self.http_client = http.client.HTTPSConnection(self.lang + ".wikipedia.org", 443)
 
     def search_title(self, text: str) -> dict:
         """
@@ -38,9 +42,12 @@ class WikipediaClient:
             "srprop": ""
         }
         url_with_params: str = helpers.add_http_parameters(url, http_params)
-        self.http_client.request("GET", url_with_params)
 
+        self._connect_http_client()
+        self.http_client.request("GET", url_with_params)
         response: bytes = self.http_client.getresponse().read()
+        self.http_client.close()
+
         return json.loads(response)
 
     def get_languages(self, title: str) -> dict:
@@ -60,12 +67,15 @@ class WikipediaClient:
             "llprop": "url"
         }
         url_with_params: str = helpers.add_http_parameters(url, http_params)
-        self.http_client.request("GET", url_with_params)
 
+        self._connect_http_client()
+        self.http_client.request("GET", url_with_params)
         response: bytes = self.http_client.getresponse().read()
+        self.http_client.close()
+
         return json.loads(response)
 
-    def get_article_language_url(self, title: str, lang: str) -> str:
+    def get_article_language_info(self, title: str, lang: str) -> tuple:
         """
         Queries wikipedia for language url for given article.
 
@@ -80,18 +90,20 @@ class WikipediaClient:
             "titles": title.replace(" ", "%20"),
             "prop": "langlinks",
             "format": "json",
-            "llprop": "url",
+            "llprop": "url|*",
             "lllang": lang
         }
         url_with_params: str = helpers.add_http_parameters(url, http_params)
+
+        self._connect_http_client()
         self.http_client.request("GET", url_with_params)
-
         response: bytes = self.http_client.getresponse().read()
+        self.http_client.close()
 
-        return WikipediaClient.get_language_url_from_json(json.loads(response), lang)
+        return WikipediaClient.get_language_info_from_json(json.loads(response), lang)
 
     @staticmethod
-    def get_language_url_from_json(langlinks_response_json: dict, language: str) -> str:
+    def get_language_info_from_json(langlinks_response_json: dict, language: str) -> tuple:
         """
         Extracts url for page in given language from langlinks api response.
 
@@ -106,5 +118,5 @@ class WikipediaClient:
                 langlinks = page["langlinks"]
         for langlink in langlinks:
             if langlink["lang"] == language:
-                return langlink["url"]
-        return ""
+                return langlink["url"], langlink["*"]
+        return "", ""

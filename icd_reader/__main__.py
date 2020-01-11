@@ -91,6 +91,8 @@ def _main():
     elif mode == 'save-to-db':
         for icd10_code in input_data:
             icd11_code: str = icd_mapper.icd_10_to_icd_11(icd10_code)
+            if icd11_code == "":
+                continue
             disease_name: str = icd_mapper.get_icd_10_name(icd10_code)
             eng_title, eng_url, pol_url = wikipedia_mapper.get_disease_wikipedia_data(icd10_code)
             db_controller.add_disease_entry(disease_name)

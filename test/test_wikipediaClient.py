@@ -30,12 +30,12 @@ class TestWikipediaClient(TestCase):
     def test_get_language_url_from_json(self):
         wikipedia_client = WikipediaClient("en")
         languages_json = wikipedia_client.get_languages("Grigori Rasputin")
-        language_url: str = WikipediaClient.get_language_url_from_json(languages_json, "be")
+        language_url, language_title = WikipediaClient.get_language_info_from_json(languages_json, "be")
 
         self.assertTrue("https://be.wikipedia.org/" in language_url)
 
     def test_get_article_language_url(self):
         wikipedia_client = WikipediaClient("en")
-        language_url: str = wikipedia_client.get_article_language_url("ICD-10", "pl")
+        language_url, language_title = wikipedia_client.get_article_language_info("ICD-10", "pl")
 
         self.assertTrue("https://pl.wikipedia.org/" in language_url)

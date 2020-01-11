@@ -1,5 +1,3 @@
-create schema icd_service collate utf8mb4_0900_ai_ci;
-
 create table DISEASES
 (
     ID_DISEASE mediumint auto_increment,
@@ -12,6 +10,23 @@ create table DISEASES
 
 alter table DISEASES
     add primary key (ID_DISEASE);
+
+create table ADDITIONAL_INFO
+(
+    ID_DISEASE         mediumint    null,
+    ID_ADDITIONAL_INFO mediumint auto_increment,
+    TYPE               varchar(32)  not null,
+    AUTHOR             varchar(128) not null,
+    INFO               text         not null,
+    constraint ADDITIONAL_INFO_ID_ADDITIONAL_INFO_uindex
+        unique (ID_ADDITIONAL_INFO),
+    constraint ADDITIONAL_INFO_DISEASES_ID_DISEASE_fk
+        foreign key (ID_DISEASE) references DISEASES (ID_DISEASE)
+            on delete cascade
+);
+
+alter table ADDITIONAL_INFO
+    add primary key (ID_ADDITIONAL_INFO);
 
 create table ICD_10
 (
@@ -39,13 +54,13 @@ create table ICD_11
 
 create table WIKI
 (
-    ID_DISEASE mediumint                 null,
-    ENG_TITLE  varchar(512) charset utf8 null,
-    PL_TITLE   varchar(512) charset utf8 null,
-    ENG_LINK   varchar(128) charset utf8 null,
-    PL_LINK    varchar(128) charset utf8 null,
-    constraint WIKI_ID_DISEASE_uindex
-        unique (ID_DISEASE),
-    constraint ID_DISEASE
+    ID_DISEASE mediumint    null,
+    LANGUAGE   varchar(4)   null,
+    TITLE      varchar(512) null,
+    LINK       varchar(128) null,
+    constraint WIKI_TEMP_TITLE_uindex
+        unique (TITLE),
+    constraint WIKI_TEMP_DISEASES_ID_DISEASE_fk
         foreign key (ID_DISEASE) references DISEASES (ID_DISEASE)
+            on delete cascade
 );

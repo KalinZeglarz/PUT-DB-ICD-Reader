@@ -63,21 +63,21 @@ class DbController:
         pass
 
     @abstractmethod
-    def get_disease_info(self, id_disease: list) -> dict:
+    def get_disease_info(self, id_disease: list) -> list:
         """
         :param id_disease:
         """
         pass
 
     @abstractmethod
-    def get_icd_10_info(self, icd10_code: str) -> dict:
+    def get_icd_10_info(self, icd10_code: str) -> list:
         """
         :param icd10_code:
         """
         pass
 
     @abstractmethod
-    def get_icd_11_info(self, icd11_code: str) -> dict:
+    def get_icd_11_info(self, icd11_code: str) -> list:
         """
         :param icd11_code:
         """

@@ -42,12 +42,14 @@ class IcdMapper:
         self.token = json.loads(res.read())
 
     def get_icd_10_name(self, icd_10_code: str) -> str:
+        icd_10_code = icd_10_code.upper()
         headers = {
             "accept": "application/json",
             "Accept-Language": "en",
             "API-Version": "v2",
             "Authorization": self.token["token_type"] + " " + self.token["access_token"],
         }
+        logging.info('Searching for name of ICD 10 code: ' + icd_10_code)
         url: str = "/icd/release/10/2016/" + icd_10_code
         self.http_client.request("GET", url, headers=headers)
         res = self.http_client.getresponse()
@@ -72,7 +74,10 @@ class IcdMapper:
         self.http_client.request("GET", url_with_params, headers=headers)
         res = self.http_client.getresponse()
         res_json: dict = json.loads(res.read())
-        return res_json["destinationEntities"][0]["theCode"].split("&")[0]
+        if res_json["destinationEntities"]:
+            return res_json["destinationEntities"][0]["theCode"].split("&")[0]
+        else:
+            return ""
 
     def icd_10_to_icd_11(self, icd_10_code: str) -> str:
         """
@@ -88,6 +93,7 @@ class IcdMapper:
         return icd_11_code
 
     def split_icd_10_code(self, icd_10_code: str) -> list:
+        icd_10_code = icd_10_code.upper()
         result: list = icd_10_code.split('.')
         while len(result) < 3:
             result.append('')

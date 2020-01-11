@@ -45,23 +45,47 @@ def add_or_update_icd10(request) -> Response:
         return Response(status=400)
 
     input_data: list = request.get_json()['data']
+    additional_languages: list = request.get_json()['additionalLanguages']
+    result: dict = {'notFound': []}
     for icd10_code in input_data:
-        icd11_code: str = icd_mapper.icd_10_to_icd_11(icd10_code)
-        disease_name: str = icd_mapper.get_icd_10_name(icd10_code)
-        eng_title, eng_url, pol_url = wikipedia_mapper.get_disease_wikipedia_data(icd10_code)
-        db_controller.add_disease_entry(disease_name)
-        id_disease: int = db_controller.get_disease_id_by_name(disease_name)
-        db_controller.add_icd_codes(id_disease, icd_mapper.split_icd_10_code(icd10_code), icd11_code)
-        db_controller.add_wiki_info(id_disease, 'eng', eng_title, eng_url)
-        db_controller.add_wiki_info(id_disease, 'pol', '', pol_url)
-    return Response(status=201)
+        not_found_languages: list = _process_icd10_code(icd10_code, additional_languages)
+        if not not_found_languages:
+            continue
+        if not_found_languages[0] is None:
+            result['notFound'].append({'icd10': icd10_code})
+        elif len(not_found_languages) > 0:
+            result['notFound'].append({'icd10': icd10_code, "languages": not_found_languages})
+    return Response(response=json.dumps(result), status=201, mimetype='application/json')
+
+
+def _process_icd10_code(icd10_code: str, additional_languages: list) -> list:
+    icd11_code: str = icd_mapper.icd_10_to_icd_11(icd10_code)
+    if icd11_code == "":
+        return [None]
+
+    disease_name: str = icd_mapper.get_icd_10_name(icd10_code)
+    wiki_infos: list = wikipedia_mapper.get_disease_wikipedia_data(icd10_code, additional_languages)
+    db_controller.add_disease_entry(disease_name)
+    id_disease: int = db_controller.get_disease_id_by_name(disease_name)
+    db_controller.add_icd_codes(id_disease, icd_mapper.split_icd_10_code(icd10_code), icd11_code)
+
+    found_languages: list = []
+    for wiki_info in wiki_infos:
+        found_languages.append(wiki_info[0])
+        db_controller.add_wiki_info(id_disease, wiki_info[0], wiki_info[1], wiki_info[2])
+
+    result: list = []
+    for additional_language in additional_languages:
+        if additional_language not in found_languages:
+            result.append(additional_language)
+    return result
 
 
 def get_icd10(request, code: str):
     response_format: str = request.args.get('format')
-    result: dict = db_controller.get_icd_10_info(code)
+    result: list = db_controller.get_icd_10_info(code)
 
-    if result == {}:
+    if not result:
         return Response(status=404)
 
     if response_format == "json-pretty":
@@ -72,8 +96,8 @@ def get_icd10(request, code: str):
 
 def get_icd11(request, code: str):
     response_format: str = request.args.get('format')
-    result: dict = db_controller.get_icd_11_info(code)
-    if result == {}:
+    result: list = db_controller.get_icd_11_info(code)
+    if not result:
         return Response(status=404)
 
     if response_format == "json-pretty":
@@ -84,8 +108,8 @@ def get_icd11(request, code: str):
 
 def get_disease(request, id_disease: int):
     response_format: str = request.args.get('format')
-    result: dict = db_controller.get_disease_info([id_disease])
-    if result == {}:
+    result: list = db_controller.get_disease_info([id_disease])
+    if not result:
         return Response(status=404)
 
     if response_format == "json-pretty":
