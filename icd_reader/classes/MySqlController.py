@@ -55,9 +55,9 @@ class MySqlController(DbController):
         icd10_split: list = icd10.split('.')
         condition: str = "WHERE CATEGORY='{0}'".format(icd10_split[0])
 
-        if len(icd10_split) > 2:
+        if len(icd10_split) >= 2:
             condition += " and DETAILS='{0}'".format(icd10_split[1])
-        if len(icd10_split) > 3:
+        if len(icd10_split) >= 3:
             condition += " and EXTENSION='{0}'".format(icd10_split[2])
 
         cursor = self.database.cursor()
@@ -198,11 +198,11 @@ class MySqlController(DbController):
                 })
             return result
 
-    def get_icd_10_info(self, icd10_code: str) -> list:
+    def get_icd10_info(self, icd10_code: str) -> list:
         id_diseases: list = self.get_disease_id_by_icd10(icd10_code)
         return self.get_disease_info(id_diseases)
 
-    def get_icd_11_info(self, icd11_code: str) -> list:
+    def get_icd11_info(self, icd11_code: str) -> list:
         id_disease: list = self.get_disease_id_by_icd11(icd11_code)
         return self.get_disease_info(id_disease)
 

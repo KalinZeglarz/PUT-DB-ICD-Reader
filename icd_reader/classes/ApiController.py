@@ -83,7 +83,7 @@ def _process_icd10_code(icd10_code: str, additional_languages: list) -> list:
 
 def get_icd10(request, code: str):
     response_format: str = request.args.get('format')
-    result: list = db_controller.get_icd_10_info(code)
+    result: list = db_controller.get_icd10_info(code)
 
     if not result:
         return Response(status=404)
@@ -96,7 +96,7 @@ def get_icd10(request, code: str):
 
 def get_icd11(request, code: str):
     response_format: str = request.args.get('format')
-    result: list = db_controller.get_icd_11_info(code)
+    result: list = db_controller.get_icd11_info(code)
     if not result:
         return Response(status=404)
 

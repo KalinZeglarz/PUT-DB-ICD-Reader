@@ -70,14 +70,14 @@ class DbController:
         pass
 
     @abstractmethod
-    def get_icd_10_info(self, icd10_code: str) -> list:
+    def get_icd10_info(self, icd10_code: str) -> list:
         """
         :param icd10_code:
         """
         pass
 
     @abstractmethod
-    def get_icd_11_info(self, icd11_code: str) -> list:
+    def get_icd11_info(self, icd11_code: str) -> list:
         """
         :param icd11_code:
         """

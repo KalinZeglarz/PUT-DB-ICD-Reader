@@ -37,7 +37,7 @@ class TestMySqlController(TestCase):
         self.db_controller.add_icd_codes(id_disease, ['unit', 'test', 'in'], 'code11')
 
     def test_get_icd10_info(self):
-        disease_info: list = self.db_controller.get_icd_10_info('unit.test.in')
+        disease_info: list = self.db_controller.get_icd10_info('unit.test.in')
         expected_disease_info: dict = {
             "codes": {
                 'icd10': 'unit.test.in',
@@ -62,7 +62,7 @@ class TestMySqlController(TestCase):
         self.assertListEqual(expected_disease_info["wikipedia"], disease_info[0]["wikipedia"])
 
     def test_get_icd11_info(self):
-        disease_info: list = self.db_controller.get_icd_11_info('code11')
+        disease_info: list = self.db_controller.get_icd11_info('code11')
         expected_disease_info: dict = {
             "codes": {
                 'icd10': 'unit.test.in',
