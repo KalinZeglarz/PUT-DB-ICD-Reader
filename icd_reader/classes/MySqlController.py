@@ -24,7 +24,7 @@ class MySqlController(DbController):
     def __del__(self):
         self.database.close()
 
-    def add_disease_entry(self, name: str):
+    def add_disease_entry(self, name: str) -> None:
         """
         :param name: Disease name
         """
@@ -93,7 +93,7 @@ class MySqlController(DbController):
                 result.append(id_disease[0])
             return result
 
-    def add_wiki_info(self, id_disease: int, language: str, title: str, link: str):
+    def add_wiki_info(self, id_disease: int, language: str, title: str, link: str) -> None:
         """
         :param title:
         :param link:
@@ -206,7 +206,7 @@ class MySqlController(DbController):
         id_disease: list = self.get_disease_id_by_icd11(icd11_code)
         return self.get_disease_info(id_disease)
 
-    def add_additional_info(self, id_disease: int, info_type: str, author: str, info: str):
+    def add_additional_info(self, id_disease: int, info_type: str, author: str, info: str) -> None:
         cursor = self.database.cursor()
         cursor.execute(
             "INSERT INTO ADDITIONAL_INFO VALUES ({0}, 0, '{1}','{2}','{3}')"
@@ -215,7 +215,7 @@ class MySqlController(DbController):
         self.database.commit()
         cursor.close()
 
-    def modify_additional_info(self, id_info: int, info_type: str, author: str, info: str):
+    def modify_additional_info(self, id_info: int, info_type: str, author: str, info: str) -> None:
         cursor = self.database.cursor()
         cursor.execute(
             "UPDATE ADDITIONAL_INFO "
@@ -225,7 +225,7 @@ class MySqlController(DbController):
         self.database.commit()
         cursor.close()
 
-    def delete_additional_info(self, id_info: int):
+    def delete_additional_info(self, id_info: int) -> None:
         cursor = self.database.cursor()
         cursor.execute(
             "DELETE FROM ADDITIONAL_INFO "

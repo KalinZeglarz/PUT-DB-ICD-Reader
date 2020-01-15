@@ -1,4 +1,3 @@
-"""Contains implementation of HtmlParser class."""
 import re
 
 from bs4 import BeautifulSoup
@@ -9,16 +8,18 @@ logger.initialize()
 
 
 class HtmlParser:
-    """Contains methods used for getting desired data from wikipedia pages HTML."""
+    """Class used for getting desired data from Wikipedia pages HTML."""
 
     @staticmethod
     def find_icd_section_title(html: str, icd_10_code: str) -> str:
-        """
-        Finds link for disease section page on ICD-10 english page.
+        """Finds link for disease section page on ICD-10 english page.
 
         :param html: html document
-        :param icd_10_code:
+        :type html: str
+        :param icd_10_code: ICD-10 code
+        :type icd_10_code:
         :return: title of wikipedia article about given icd 10 code category
+        :rtype: str
         """
         html_object: BeautifulSoup = BeautifulSoup(html, "html.parser")
 
@@ -68,12 +69,14 @@ class HtmlParser:
 
     @staticmethod
     def find_disease_name_and_link(html: str, icd_10_code: str) -> tuple:
-        """
-        Finds disease on disease section page and returns its link and title.
+        """Finds disease on disease section page and returns its link and title.
 
         :param html: html document
-        :param icd_10_code:
-        :return: link to article and its title.
+        :type html: str
+        :param icd_10_code: ICD-10 code
+        :type icd_10_code: str
+        :return: link to article and its title
+        :rtype: tuple
         """
         html_object: BeautifulSoup = BeautifulSoup(html, "html.parser")
 

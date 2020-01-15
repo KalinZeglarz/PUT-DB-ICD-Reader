@@ -1,5 +1,9 @@
-mysql-connector-python
-flask
 beautifulsoup4
 wikipedia
+mysql-connector-python
+
+flask
 flask-restplus
+
+Sphinx
+autodocsumm

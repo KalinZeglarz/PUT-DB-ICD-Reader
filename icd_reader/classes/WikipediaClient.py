@@ -1,5 +1,3 @@
-"""Contains implementation of WikipediaClient class."""
-
 import http.client
 import json
 import logging
@@ -10,26 +8,35 @@ logger.initialize()
 
 
 class WikipediaClient:
-    """Contains methods used to communicate with wikipedia API"""
+    """Class used to communicate with Wikipedia API."""
 
     http_client: http.client.HTTPSConnection
     lang: str
 
-    def __init__(self, lang: str):
-        self.lang = lang
+    def __init__(self, language: str):
+        """ Default constructor.
+
+        :param language: Langueage of Wikipedia API (examples: en, pl)
+        :type language:
+        """
+        self.lang = language
 
     def __del__(self):
+        """Destructor. Closes connection to Wikipedia API (if any connections left).
+
+        """
         self.http_client.close()
 
-    def _connect_http_client(self):
+    def _connect_http_client(self) -> None:
         self.http_client = http.client.HTTPSConnection(self.lang + ".wikipedia.org", 443)
 
     def search_title(self, text: str) -> dict:
-        """
-        Searches Wikipedia with given text.
+        """Searches Wikipedia for article with given text.
 
-        :param text: Text to be searched via wikipedia API
-        :return: Search result in JSON format
+        :param text: text to be searched via wikipedia API
+        :type text: str
+        :return: search result in JSON format
+        :rtype: dict
         """
         logging.info("Searching wikipedia for text '{0}'".format(text))
         url: str = "/w/api.php"
@@ -51,11 +58,12 @@ class WikipediaClient:
         return json.loads(response)
 
     def get_languages(self, title: str) -> dict:
-        """
-        Queries wikipedia for a list of languages for given article.
+        """Queries Wikipedia API for a list of languages for given article.
 
-        :param title: Article title
+        :param title: article title
+        :type title: str
         :return: API response in JSON format
+        :rtype: dict
         """
         logging.info("Searching wikipedia for languages for article with title '{0}'".format(title))
         url: str = "/w/api.php"
@@ -75,15 +83,17 @@ class WikipediaClient:
 
         return json.loads(response)
 
-    def get_article_language_info(self, title: str, lang: str) -> tuple:
-        """
-        Queries wikipedia for language url for given article.
+    def get_article_language_info(self, title: str, language: str) -> tuple:
+        """Queries wikipedia for language url for given article.
 
         :param title: Article language in short form (e.g.: en, pl, etc.)
-        :param lang: Article language to be searched for
-        :return: Link to article in given language or empty string if not found
+        :type title: str
+        :param language: Article language to be searched for (examples: en, pl)
+        :type language: str
+        :return: Link to and title of article in given language or empty strings if not found
+        :rtype: tuple
         """
-        logging.info("Searching wikipedia for '{0}' language for article with title '{1}'".format(lang, title))
+        logging.info("Searching wikipedia for '{0}' language for article with title '{1}'".format(language, title))
         url: str = "/w/api.php"
         http_params: dict = {
             "action": "query",
@@ -91,7 +101,7 @@ class WikipediaClient:
             "prop": "langlinks",
             "format": "json",
             "llprop": "url|*",
-            "lllang": lang
+            "lllang": language
         }
         url_with_params: str = helpers.add_http_parameters(url, http_params)
 
@@ -100,17 +110,10 @@ class WikipediaClient:
         response: bytes = self.http_client.getresponse().read()
         self.http_client.close()
 
-        return WikipediaClient.get_language_info_from_json(json.loads(response), lang)
+        return WikipediaClient._get_language_info_from_json(json.loads(response), language)
 
     @staticmethod
-    def get_language_info_from_json(langlinks_response_json: dict, language: str) -> tuple:
-        """
-        Extracts url for page in given language from langlinks api response.
-
-        :param langlinks_response_json:  Response from langlinks wikipedia query
-        :param language: Language to be searched in langlinks response
-        :return: Link to article in given language or empty string if not found
-        """
+    def _get_language_info_from_json(langlinks_response_json: dict, language: str) -> tuple:
         pages: dict = langlinks_response_json["query"]["pages"]
         langlinks: list = []
         for page in pages.values():

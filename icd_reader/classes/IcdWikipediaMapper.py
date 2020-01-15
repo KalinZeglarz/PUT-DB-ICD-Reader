@@ -1,4 +1,3 @@
-"""Contains implementation of IcdReader class."""
 import json
 import logging
 import re
@@ -14,13 +13,18 @@ logger.initialize()
 
 
 class IcdWikipediaMapper:
-    """Handles readings of ICD codes and getting data bout it from wikipedia."""
+    """Class used for mapping ICD-10 code with Wikipedia articles."""
 
     wikipedia_client: WikipediaClient
     icd_chapter_map: dict
     wikipedia_pages_cache: OrderedDict = OrderedDict()
 
     def __init__(self, code_spaces_path: str):
+        """Loads codespaces for ICD-10 category articles.
+
+        :param code_spaces_path: path to file with wikipedia article codespaces
+        :type code_spaces_path: str
+        """
         self.wikipedia_client = WikipediaClient("en")
         self._load_code_spaces_json(code_spaces_path)
 
@@ -72,12 +76,14 @@ class IcdWikipediaMapper:
         return result
 
     def get_disease_wikipedia_data(self, icd_10_code: str, languages: list = None) -> list:
-        """
-        Searches for article about disease with given ICD 10 code.
+        """Searches for article about disease with given ICD-10 code.
 
-        :param icd_10_code:
-        :param languages:
+        :param icd_10_code: ICD-10 code
+        :type icd_10_code: str
+        :param languages: Article languages to be searched for (examples: en, es, ru, pl)
+        :type languages: list
         :return: article title and link to english and polish version of article
+        :rtype: list
         """
         if languages is None:
             languages = []
@@ -106,17 +112,19 @@ class IcdWikipediaMapper:
                     if language_url != "":
                         result.append((language, language_title, language_url))
 
-        logging.debug("Article title for ICD 10 code '{0}' is '{1}'".format(icd_10_code, title))
-        logging.debug("Articles urls for ICD 10 code '{0}' is '{1}'".format(icd_10_code, result))
+        logging.debug("Article title for ICD-10 code '{0}' is '{1}'".format(icd_10_code, title))
+        logging.debug("Articles urls for ICD-10 code '{0}' is '{1}'".format(icd_10_code, result))
         return result
 
     def get_diseases_wikipedia_data(self, icd_10_code_list: list, languages: list = None) -> list:
-        """
-        Searches for articles about diseases with given ICD 10 codes.
+        """Searches for articles about diseases with given ICD-10 codes.
 
-        :param icd_10_code_list:
-        :param languages:
-        :return: list of article title and link to english and polish version of article
+        :param icd_10_code_list: list of ICD-10 codes
+        :type icd_10_code_list: list
+        :param languages: Article languages to be searched for (examples: en, es, ru, pl)
+        :type languages: list
+        :return: list of article title and link to english and other versions of article
+        :rtype: list
         """
         if languages is None:
             languages = []
