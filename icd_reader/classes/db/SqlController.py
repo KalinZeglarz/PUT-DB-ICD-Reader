@@ -55,12 +55,14 @@ class MySqlController(DbController):
 
     def get_disease_id_by_icd10(self, icd10: str) -> list:
         icd10_split: list = icd10.split('.')
+        while len(icd10_split) < 3:
+            icd10_split.append('')
 
         session = self.db_session()
         icd10_list: List[Icd10] = session.query(Icd10) \
-            .filter(Icd10.category == icd10_split[0]
-                    and Icd10.details.startswith(icd10_split[1])
-                    and Icd10.extension.startswith(icd10_split[2])) \
+            .filter(Icd10.category == icd10_split[0],
+                    Icd10.details.startswith(icd10_split[1]),
+                    Icd10.extension.startswith(icd10_split[2])) \
             .all()
         session.close()
 
