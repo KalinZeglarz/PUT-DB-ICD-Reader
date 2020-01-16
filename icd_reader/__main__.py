@@ -5,10 +5,10 @@ import sys
 from datetime import datetime
 
 from icd_reader import logger
-from icd_reader.classes.DbController import DbController
 from icd_reader.classes.IcdMapper import IcdMapper
 from icd_reader.classes.IcdWikipediaMapper import IcdWikipediaMapper
-from icd_reader.classes.MySqlController import MySqlController
+from icd_reader.classes.db.DbController import DbController
+from icd_reader.classes.db.SqlController import MySqlController
 
 configuration: dict
 
@@ -68,6 +68,7 @@ def _main():
         client_secret=configuration['icd-api-credentials']['client-secret']
     )
     db_controller: DbController = MySqlController(
+        database=configuration['db-parameters']['database'],
         host=configuration['db-parameters']['host'],
         user=configuration['db-parameters']['user'],
         password=configuration['db-parameters']['password']

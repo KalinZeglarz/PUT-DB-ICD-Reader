@@ -4,10 +4,10 @@ import logging
 from flask import Response
 
 from icd_reader import logger
-from icd_reader.classes.DbController import DbController
 from icd_reader.classes.IcdMapper import IcdMapper
 from icd_reader.classes.IcdWikipediaMapper import IcdWikipediaMapper
-from icd_reader.classes.MySqlController import MySqlController
+from icd_reader.classes.db.DbController import DbController
+from icd_reader.classes.db.SqlController import MySqlController
 
 logger.initialize()
 
@@ -25,6 +25,7 @@ def load_configuration():
         configuration = json.load(f)
         logging.info("Loaded configuration from path 'resources/configuration.json'")
     db_controller = MySqlController(
+        database=configuration['db-parameters']['database'],
         host=configuration['db-parameters']['host'],
         user=configuration['db-parameters']['user'],
         password=configuration['db-parameters']['password']

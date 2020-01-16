@@ -4,6 +4,7 @@
     "client-secret": "qfRSgmvnd7b6NBvYB3NAs0UwIPEU3pXAiFQODGMFhb8="
   },
   "db-parameters": {
+    "database": "mysql+mysqlconnector",
     "host": "localhost",
     "user": "root",
     "password": "root"

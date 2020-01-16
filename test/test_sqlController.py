@@ -2,8 +2,8 @@
 import json
 from unittest import TestCase
 
-from icd_reader.classes.DbController import DbController
-from icd_reader.classes.MySqlController import MySqlController
+from icd_reader.classes.db.DbController import DbController
+from icd_reader.classes.db.SqlController import MySqlController
 
 
 class TestMySqlController(TestCase):
