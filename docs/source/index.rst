@@ -1,18 +1,17 @@
-Welcome to ICD-11 Mapper's documentation!
+Welcome to ICD Mapper Documentation
 =========================================
 
+ICD Mapper is an REST application used for mapping ICD-10 codes to ICD-11
+codes. Additionaly application collects information about wikipedia
+articles for mapped codes and allows adding extra informations to
+mapped diseases.
+
 .. toctree::
-    :maxdepth: 2
+    :caption: Table of Contents
 
-    DbController
-    WikipediaClient
-    HtmlParser
-    IcdMapper
-    IcdWikipediaMapper
+    Docker
+    Classes
 
-Indices and tables
-==================
+.. important:: REST API Documentation
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   REST API is documented with Swagger, which is not included here.
