@@ -1,13 +1,14 @@
 import json
 import logging
+import os
 
 from flask import Response
 
-from icd_reader import logger
-from icd_reader.classes.IcdMapper import IcdMapper
-from icd_reader.classes.IcdWikipediaMapper import IcdWikipediaMapper
-from icd_reader.classes.db.DbController import DbController
-from icd_reader.classes.db.SqlController import MySqlController
+from icd_mapper import logger
+from icd_mapper.classes.IcdMapper import IcdMapper
+from icd_mapper.classes.IcdWikipediaMapper import IcdWikipediaMapper
+from icd_mapper.classes.db.DbController import DbController
+from icd_mapper.classes.db.SqlController import MySqlController
 
 logger.initialize()
 
@@ -16,14 +17,25 @@ db_controller: DbController
 wikipedia_mapper: IcdWikipediaMapper
 
 
+def _check_env_variables(base_key: str, configuration: dict) -> dict:
+    for key in configuration:
+        key_env: str = key.replace('-', '_')
+        if type(configuration[key]) == dict:
+            configuration[key] = _check_env_variables(base_key + key_env + '_', configuration[key])
+        elif os.getenv(base_key + key_env) is not None:
+            configuration[key] = os.environ[base_key + key_env]
+    return configuration
+
+
 def load_configuration():
     global icd_mapper
     global db_controller
     global wikipedia_mapper
 
-    with open('resources/configuration.json', 'r') as f:
+    with open('./resources/configuration.json', 'r') as f:
         configuration = json.load(f)
         logging.info("Loaded configuration from path 'resources/configuration.json'")
+    configuration = _check_env_variables('', configuration)
     db_controller = MySqlController(
         database=configuration['db-parameters']['database'],
         host=configuration['db-parameters']['host'],
@@ -34,7 +46,7 @@ def load_configuration():
         client_id=configuration['icd-api-credentials']['client-id'],
         client_secret=configuration['icd-api-credentials']['client-secret']
     )
-    wikipedia_mapper = IcdWikipediaMapper("resources/codeSpaces.json")
+    wikipedia_mapper = IcdWikipediaMapper("./resources/codeSpaces.json")
 
 
 def add_or_update_icd10(request) -> Response:

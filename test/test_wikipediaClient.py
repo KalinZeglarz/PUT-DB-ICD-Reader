@@ -1,7 +1,7 @@
 """Unit tests for WikipediaClient class"""
 from unittest import TestCase
 
-from icd_reader.classes.WikipediaClient import WikipediaClient
+from icd_mapper.classes.WikipediaClient import WikipediaClient
 
 
 class TestWikipediaClient(TestCase):

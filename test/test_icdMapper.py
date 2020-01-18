@@ -1,7 +1,7 @@
 """Unit tests for IcdMapper class"""
 from unittest import TestCase
 
-from icd_reader.classes.IcdMapper import IcdMapper
+from icd_mapper.classes.IcdMapper import IcdMapper
 
 
 class TestIcdMapper(TestCase):

@@ -6,8 +6,8 @@ from sqlalchemy.engine import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, scoped_session, Session
 from sqlalchemy.orm.strategy_options import load_only
 
-from icd_reader.classes.db.DbController import DbController
-from icd_reader.classes.db.sql_orm import *
+from icd_mapper.classes.db.DbController import DbController
+from icd_mapper.classes.db.sql_orm import *
 
 
 class MySqlController(DbController):
@@ -32,7 +32,7 @@ class MySqlController(DbController):
 
     def _add_and_commit(self, data):
         session: Session = self.db_session()
-        session.add(data)
+        session.merge(data)
         session.commit()
         session.close()
 
@@ -42,9 +42,8 @@ class MySqlController(DbController):
 
     def get_disease_id_by_name(self, name: str) -> int:
         session: Session = self.db_session()
-        id_disease: List[Disease] = session.query(Disease) \
+        id_disease: List[Disease] = session.query(Disease.id_disease) \
             .filter(Disease.name == name) \
-            .options(load_only("id_disease")) \
             .all()
         session.close()
 
@@ -59,7 +58,7 @@ class MySqlController(DbController):
             icd10_split.append('')
 
         session = self.db_session()
-        icd10_list: List[Icd10] = session.query(Icd10) \
+        icd10_list: List[Icd10] = session.query(Icd10.id_disease) \
             .filter(Icd10.category == icd10_split[0],
                     Icd10.details.startswith(icd10_split[1]),
                     Icd10.extension.startswith(icd10_split[2])) \
@@ -76,7 +75,7 @@ class MySqlController(DbController):
 
     def get_disease_id_by_icd11(self, icd11: str) -> list:
         session = self.db_session()
-        id_diseases: List[Icd11] = session.query(Icd11) \
+        id_diseases: List[Icd11] = session.query(Icd11.id_disease) \
             .filter(Icd11.code == icd11) \
             .options(load_only("id_disease")) \
             .all()
@@ -99,8 +98,8 @@ class MySqlController(DbController):
         icd11 = Icd11(id_disease=id_disease, code=icd11_code)
 
         session: Session = self.db_session()
-        session.add(icd10)
-        session.add(icd11)
+        session.merge(icd10)
+        session.merge(icd11)
         session.commit()
         session.close()
 

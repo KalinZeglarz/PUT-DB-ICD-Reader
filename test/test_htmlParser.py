@@ -3,8 +3,8 @@ from unittest import TestCase
 
 from wikipedia import wikipedia
 
-from icd_reader.classes.HtmlParser import HtmlParser
-from icd_reader.classes.WikipediaClient import WikipediaClient
+from icd_mapper.classes.HtmlParser import HtmlParser
+from icd_mapper.classes.WikipediaClient import WikipediaClient
 
 
 class TestHtmlParser(TestCase):

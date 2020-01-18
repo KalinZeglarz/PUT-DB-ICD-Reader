@@ -3,9 +3,7 @@ create table DISEASES
     ID_DISEASE mediumint auto_increment,
     NAME       varchar(256) charset utf8 null,
     constraint DISEASES_ID_DISEASE_uindex
-        unique (ID_DISEASE),
-    constraint DISEASES_NAME_uindex
-        unique (NAME)
+        unique (ID_DISEASE)
 );
 
 alter table DISEASES
@@ -38,7 +36,7 @@ create table ICD_10
         unique (ID_DISEASE),
     constraint ICD_10_DISEASES_ID_DISEASE_fk
         foreign key (ID_DISEASE) references DISEASES (ID_DISEASE)
-            on delete set null
+            on delete cascade
 );
 
 create table ICD_11
@@ -49,7 +47,7 @@ create table ICD_11
         unique (ID_DISEASE),
     constraint ICD_11_DISEASES_ID_DISEASE_fk
         foreign key (ID_DISEASE) references DISEASES (ID_DISEASE)
-            on delete set null
+            on delete cascade
 );
 
 create table WIKI
@@ -58,8 +56,6 @@ create table WIKI
     LANGUAGE   varchar(4)   null,
     TITLE      varchar(512) null,
     LINK       varchar(128) null,
-    constraint WIKI_TEMP_TITLE_uindex
-        unique (TITLE),
     constraint WIKI_TEMP_DISEASES_ID_DISEASE_fk
         foreign key (ID_DISEASE) references DISEASES (ID_DISEASE)
             on delete cascade

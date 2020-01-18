@@ -5,9 +5,9 @@ from collections import OrderedDict
 
 from wikipedia import wikipedia
 
-from icd_reader import logger
-from icd_reader.classes.HtmlParser import HtmlParser
-from icd_reader.classes.WikipediaClient import WikipediaClient
+from icd_mapper import logger
+from icd_mapper.classes.HtmlParser import HtmlParser
+from icd_mapper.classes.WikipediaClient import WikipediaClient
 
 logger.initialize()
 

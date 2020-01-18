@@ -1,10 +1,12 @@
+import os
+
 import flask_restplus
 from flask import Flask, request
 from flask_restplus import Resource
 
-from icd_reader import logger
-from icd_reader.classes import ApiController
-from icd_reader.classes.ApiModels import ApiModels
+from icd_mapper import logger
+from icd_mapper.classes import ApiController
+from icd_mapper.classes.ApiModels import ApiModels
 
 logger.initialize()
 
@@ -99,8 +101,13 @@ class AdditionalInfo(Resource):
 
 
 if __name__ == '__main__':
+    # Sets working directory to this script's directory
+    abs_path = os.path.abspath(__file__)
+    dir_name = os.path.dirname(abs_path)
+    os.chdir(dir_name)
+
     ApiController.load_configuration()
     app.run(
-        host='0.0.0.0',
-        port=80
+        host=str(os.getenv('server_host', '0.0.0.0')),
+        port=int(os.getenv('server_port', 5000))
     )

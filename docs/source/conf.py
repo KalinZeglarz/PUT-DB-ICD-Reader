@@ -13,7 +13,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../../icd_reader/'))
+sys.path.insert(0, os.path.abspath('../../icd_mapper/'))
 sys.setrecursionlimit(1500)
 
 # -- Project information -----------------------------------------------------

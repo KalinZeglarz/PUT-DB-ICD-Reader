@@ -2,7 +2,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from icd_reader import logger
+from icd_mapper import logger
 
 logger.initialize()
 

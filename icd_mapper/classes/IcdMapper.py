@@ -3,7 +3,7 @@ import json
 import logging
 from base64 import b64encode
 
-from icd_reader import helpers, logger
+from icd_mapper import helpers, logger
 
 logger.initialize()
 

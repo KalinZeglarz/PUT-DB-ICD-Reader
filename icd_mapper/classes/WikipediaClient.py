@@ -2,7 +2,7 @@ import http.client
 import json
 import logging
 
-from icd_reader import helpers, logger
+from icd_mapper import helpers, logger
 
 logger.initialize()
 
