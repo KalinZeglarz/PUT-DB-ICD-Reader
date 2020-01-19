@@ -30,8 +30,7 @@ To create container use docker run:
 
     docker run --name CONTAINER_NAME -p EXTERNAL_PORT:DOCKER_PORT IMAGE_NAME
 
-Configuration
-*************
+.. rubric:: Configuration
 
 Container must be configurated with environmental variables
 to function properly.

@@ -14,18 +14,18 @@ api_description: str = 'ICD Mapper API is a REST API that allows mapping ICD-10 
                        'disease related Wikipedia articles'
 
 app = Flask(__name__)
-api = flask_restplus.Api(app, version='1.0', title='ICD READER API', description=api_description)
-ns_reader = api.namespace('icd-reader', description='')
-ns_additional_info = api.namespace('icd-reader/additional-info', description='')
+api = flask_restplus.Api(app, version='1.0', title='ICD Mapper API', description=api_description)
+ns_mapper = api.namespace('icd-mapper', description='')
+ns_additional_info = api.namespace('icd-mapper/additional-info', description='')
 
 models: ApiModels = ApiModels(api)
 
 
-@ns_reader.route('/map/icd-10')
-@ns_reader.expect(models.map_post_put_body)
-@ns_reader.response(201, 'Created')
-@ns_reader.response(400, 'Bad Request')
-@ns_reader.response(500, 'Internal Server Error')
+@ns_mapper.route('/map/icd-10')
+@ns_mapper.expect(models.map_post_put_body)
+@ns_mapper.response(201, 'Created')
+@ns_mapper.response(400, 'Bad Request')
+@ns_mapper.response(500, 'Internal Server Error')
 class MapIcd10(Resource):
 
     def post(self):
@@ -37,39 +37,39 @@ class MapIcd10(Resource):
         return ApiController.add_or_update_icd10(request)
 
 
-@ns_reader.route('/icd-10/<code>')
-@ns_reader.doc(params={'code': 'An ICD-10 code'})
-@ns_reader.response(200, 'Success')
-@ns_reader.response(404, 'Not Found')
-@ns_reader.response(500, 'Internal Server Error')
+@ns_mapper.route('/icd-10/<code>')
+@ns_mapper.doc(params={'code': 'An ICD-10 code'})
+@ns_mapper.response(200, 'Success')
+@ns_mapper.response(404, 'Not Found')
+@ns_mapper.response(500, 'Internal Server Error')
 class GetIcd10(Resource):
-    @ns_reader.doc(params={'format': 'Response data format (json, json-pretty)'})
+    @ns_mapper.doc(params={'format': 'Response data format (json, json-pretty)'})
     def get(self, code: str):
         """This endpoint returns all information about diseases matching ICD-10 codes."""
         return ApiController.get_icd10(request, code)
 
 
 # noinspection DuplicatedCode
-@ns_reader.route('/icd-11/<code>')
-@ns_reader.doc(params={'code': 'An ICD-11 code'})
-@ns_reader.response(200, 'Success')
-@ns_reader.response(404, 'Not Found')
-@ns_reader.response(500, 'Internal Server Error')
+@ns_mapper.route('/icd-11/<code>')
+@ns_mapper.doc(params={'code': 'An ICD-11 code'})
+@ns_mapper.response(200, 'Success')
+@ns_mapper.response(404, 'Not Found')
+@ns_mapper.response(500, 'Internal Server Error')
 class GetIcd11(Resource):
-    @ns_reader.doc(params={'format': 'Response data format (json, json-pretty)'})
+    @ns_mapper.doc(params={'format': 'Response data format (json, json-pretty)'})
     def get(self, code: str):
         """This endpoint returns all information about disease matching ICD-11 code."""
         return ApiController.get_icd11(request, code)
 
 
 # noinspection DuplicatedCode
-@ns_reader.route('/disease/<id>')
-@ns_reader.doc(params={'id': 'Internal disease ID'})
-@ns_reader.response(200, 'Success')
-@ns_reader.response(404, 'Not Found')
-@ns_reader.response(500, 'Internal Server Error')
+@ns_mapper.route('/disease/<id>')
+@ns_mapper.doc(params={'id': 'Internal disease ID'})
+@ns_mapper.response(200, 'Success')
+@ns_mapper.response(404, 'Not Found')
+@ns_mapper.response(500, 'Internal Server Error')
 class GetDisease(Resource):
-    @ns_reader.doc(params={'format': 'Response data format (json, json-pretty)'})
+    @ns_mapper.doc(params={'format': 'Response data format (json, json-pretty)'})
     def get(self, id: int):
         """This endpoint returns all information about disease matching database id."""
         return ApiController.get_disease(request, id)
