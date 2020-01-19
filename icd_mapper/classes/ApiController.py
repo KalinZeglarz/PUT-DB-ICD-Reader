@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from multiprocessing import Pool
 
 from flask import Response
 
@@ -8,13 +9,15 @@ from icd_mapper import logger
 from icd_mapper.classes.IcdMapper import IcdMapper
 from icd_mapper.classes.IcdWikipediaMapper import IcdWikipediaMapper
 from icd_mapper.classes.db.DbController import DbController
-from icd_mapper.classes.db.SqlController import MySqlController
+from icd_mapper.classes.db.SqlController import SqlController
 
 logger.initialize()
 
 icd_mapper: IcdMapper
 db_controller: DbController
 wikipedia_mapper: IcdWikipediaMapper
+proc_pool: Pool = None
+configuration: dict = None
 
 
 def _check_env_variables(base_key: str, configuration: dict) -> dict:
@@ -28,15 +31,13 @@ def _check_env_variables(base_key: str, configuration: dict) -> dict:
 
 
 def load_configuration():
-    global icd_mapper
-    global db_controller
-    global wikipedia_mapper
+    global icd_mapper, db_controller, wikipedia_mapper, configuration
 
     with open('./resources/configuration.json', 'r') as f:
         configuration = json.load(f)
         logging.info("Loaded configuration from path 'resources/configuration.json'")
     configuration = _check_env_variables('', configuration)
-    db_controller = MySqlController(
+    db_controller = SqlController(
         database=configuration['db-parameters']['database'],
         host=configuration['db-parameters']['host'],
         user=configuration['db-parameters']['user'],
@@ -49,48 +50,79 @@ def load_configuration():
     wikipedia_mapper = IcdWikipediaMapper("./resources/codeSpaces.json")
 
 
+def start_process_pool():
+    global proc_pool, configuration
+
+    pool_size = int(configuration["server-parameters"]["pool-size"])
+    proc_pool = Pool(pool_size)
+    logging.info("Started process pool with {} processes".format(pool_size))
+
+
 def add_or_update_icd10(request) -> Response:
-    global icd_mapper
-    global db_controller
-    global wikipedia_mapper
+    global icd_mapper, db_controller, wikipedia_mapper, proc_pool
 
     if 'data' not in request.get_json():
         return Response(status=400)
 
-    input_data: list = request.get_json()['data']
+    icd10_codes: list = request.get_json()['data']
     additional_languages: list = request.get_json()['additionalLanguages']
-    result: dict = {'notFound': []}
-    for icd10_code in input_data:
-        not_found_languages: list = _process_icd10_code(icd10_code, additional_languages)
-        if not not_found_languages:
-            continue
-        if not_found_languages[0] is None:
-            result['notFound'].append({'icd10': icd10_code})
-        elif len(not_found_languages) > 0:
-            result['notFound'].append({'icd10': icd10_code, "languages": not_found_languages})
+    pool_results: dict = {}
+    for icd10_code in icd10_codes:
+        args: tuple = (
+            icd10_code,
+            additional_languages,
+            icd_mapper,
+            wikipedia_mapper,
+        )
+        pool_results[icd10_code] = proc_pool.apply_async(func=_process_icd10_code, args=args)
+
+    result: dict = _process_pool_results(pool_results, icd10_codes)
+
     return Response(response=json.dumps(result), status=201, mimetype='application/json')
 
 
-def _process_icd10_code(icd10_code: str, additional_languages: list) -> list:
+def _process_pool_results(pool_results: dict, icd10_codes) -> dict:
+    result: dict = {'notFound': []}
+    for icd10_code in icd10_codes:
+        pool_result: dict = pool_results[icd10_code].get()
+
+        if pool_result == {}:
+            result['notFound'].append({'icd10': icd10_code})
+            continue
+        if len(pool_result['not_found_languages']) > 0:
+            result['notFound'].append({'icd10': icd10_code, "languages": pool_result['not_found_languages']})
+
+        db_controller.add_disease_entry(pool_result['disease_name'])
+        id_disease: int = db_controller.get_disease_id_by_name(pool_result['disease_name'])
+        db_controller.add_icd_codes(id_disease, icd_mapper.split_icd_10_code(icd10_code), pool_result['icd11_code'])
+
+        for wiki_info in pool_result['wiki_infos']:
+            pool_result['found_languages'].append(wiki_info[0])
+            db_controller.add_wiki_info(id_disease, wiki_info[0], wiki_info[1], wiki_info[2])
+    return result
+
+
+def _process_icd10_code(icd10_code: str, additional_languages: list, icd_mapper, wikipedia_mapper) -> dict:
+    result: dict = {}
     icd11_code: str = icd_mapper.icd_10_to_icd_11(icd10_code)
     if icd11_code == "":
-        return [None]
+        return {}
+    result['icd11_code'] = icd11_code
 
     disease_name: str = icd_mapper.get_icd_10_name(icd10_code)
     wiki_infos: list = wikipedia_mapper.get_disease_wikipedia_data(icd10_code, additional_languages)
-    db_controller.add_disease_entry(disease_name)
-    id_disease: int = db_controller.get_disease_id_by_name(disease_name)
-    db_controller.add_icd_codes(id_disease, icd_mapper.split_icd_10_code(icd10_code), icd11_code)
+    result['disease_name'] = disease_name
+    result['wiki_infos'] = wiki_infos
 
     found_languages: list = []
     for wiki_info in wiki_infos:
         found_languages.append(wiki_info[0])
-        db_controller.add_wiki_info(id_disease, wiki_info[0], wiki_info[1], wiki_info[2])
+    result['found_languages'] = found_languages
 
-    result: list = []
+    result['not_found_languages'] = []
     for additional_language in additional_languages:
         if additional_language not in found_languages:
-            result.append(additional_language)
+            result['not_found_languages'].append(additional_language)
     return result
 
 

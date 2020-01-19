@@ -54,8 +54,8 @@ create table WIKI
 (
     ID_DISEASE mediumint    null,
     LANGUAGE   varchar(4)   null,
-    TITLE      varchar(512) null,
-    LINK       varchar(128) null,
+    TITLE      varchar(256) null,
+    LINK       varchar(512) null,
     constraint WIKI_TEMP_DISEASES_ID_DISEASE_fk
         foreign key (ID_DISEASE) references DISEASES (ID_DISEASE)
             on delete cascade

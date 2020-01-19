@@ -1,20 +1,21 @@
-"""Unit tests for MySqlController class"""
+"""Unit tests for SqlController class"""
 import json
 from unittest import TestCase
 
 from icd_mapper.classes.db.DbController import DbController
-from icd_mapper.classes.db.SqlController import MySqlController
+from icd_mapper.classes.db.SqlController import SqlController
 
 
-class TestMySqlController(TestCase):
+class TestSqlController(TestCase):
     db_controller: DbController
 
     def __init__(self, *args, **kwargs):
-        super(TestMySqlController, self).__init__(*args, **kwargs)
+        super(TestSqlController, self).__init__(*args, **kwargs)
         with open('../icd_mapper/resources/configuration.json', 'r') as f:
             configuration = json.load(f)
 
-        self.db_controller = MySqlController(
+        self.db_controller = SqlController(
+            database=configuration['db-parameters']['database'],
             host=configuration['db-parameters']['host'],
             user=configuration['db-parameters']['user'],
             password=configuration['db-parameters']['password']

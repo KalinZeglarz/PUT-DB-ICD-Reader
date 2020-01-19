@@ -29,7 +29,7 @@ class IcdWikipediaMapper:
         self._load_code_spaces_json(code_spaces_path)
 
     def __del__(self):
-        self.wikipedia_client.__del__()
+        pass
 
     def _load_code_spaces_json(self, code_spaces_path: str) -> None:
         file = open(code_spaces_path, "r")
@@ -60,7 +60,7 @@ class IcdWikipediaMapper:
         icd_10_wikipedia_chapter = self._get_icd_10_article_chapter(icd_10_code)
         if icd_10_wikipedia_chapter == "not found":
             return "not found"
-        icd_10_chapter_search_str: str = "Chapter {0} of ICD-10 deals with".format(icd_10_wikipedia_chapter)
+        icd_10_chapter_search_str: str = "Chapter {} of ICD-10 deals with".format(icd_10_wikipedia_chapter)
         icd_10_search_result: dict = self.wikipedia_client.search_title(icd_10_chapter_search_str)
         return icd_10_search_result["query"]["search"][0]["title"]
 
@@ -102,18 +102,19 @@ class IcdWikipediaMapper:
             return []
 
         result: list = [('en', title, "https://en.wikipedia.org" + url)]
-        if url != "":
-            title_search_response = self.wikipedia_client.search_title(title)
-            if len(title_search_response["query"]["search"]) > 0:
-                title = title_search_response["query"]["search"][0]["title"]
-                for language in languages:
-                    language_url, language_title = self.wikipedia_client.get_article_language_info(
-                        title.replace("'s", ""), language)
-                    if language_url != "":
-                        result.append((language, language_title, language_url))
 
-        logging.debug("Article title for ICD-10 code '{0}' is '{1}'".format(icd_10_code, title))
-        logging.debug("Articles urls for ICD-10 code '{0}' is '{1}'".format(icd_10_code, result))
+        title_search_response = self.wikipedia_client.search_title(title)
+        if len(title_search_response["query"]["search"]) > 0:
+            title = title_search_response["query"]["search"][0]["title"]
+
+            for language in languages:
+                language_url, language_title = self.wikipedia_client.get_article_language_info(
+                    title.replace("'s", ""), language)
+                if language_url != "":
+                    result.append((language, language_title, language_url))
+
+        logging.debug("Article title for ICD-10 code '{}' is '{}'".format(icd_10_code, title))
+        logging.debug("Articles urls for ICD-10 code '{}' is '{}'".format(icd_10_code, result))
         return result
 
     def get_diseases_wikipedia_data(self, icd_10_code_list: list, languages: list = None) -> list:
@@ -132,9 +133,9 @@ class IcdWikipediaMapper:
         for icd_10_code in icd_10_code_list:
             data_search_result: list = self.get_disease_wikipedia_data(icd_10_code, languages)
             if not data_search_result:
-                logging.info("Code '{0}' not found".format(icd_10_code))
+                logging.info("Code '{}' not found".format(icd_10_code))
             elif data_search_result[0]:
                 result.append(data_search_result)
             elif data_search_result[0] == "":
-                logging.info("Code '{0}' article not found".format(icd_10_code))
+                logging.info("Code '{}' article not found".format(icd_10_code))
         return result

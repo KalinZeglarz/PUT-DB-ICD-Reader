@@ -8,5 +8,10 @@
     "host": "localhost",
     "user": "root",
     "password": "root"
+  },
+  "server-parameters": {
+    "host": "0.0.0.0",
+    "port": 5000,
+    "pool-size": 10
   }
 }

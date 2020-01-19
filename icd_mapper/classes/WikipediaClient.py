@@ -10,7 +10,6 @@ logger.initialize()
 class WikipediaClient:
     """Class used to communicate with Wikipedia API."""
 
-    http_client: http.client.HTTPSConnection
     lang: str
 
     def __init__(self, language: str):
@@ -22,13 +21,10 @@ class WikipediaClient:
         self.lang = language
 
     def __del__(self):
-        """Destructor. Closes connection to Wikipedia API (if any connections left).
+        pass
 
-        """
-        self.http_client.close()
-
-    def _connect_http_client(self) -> None:
-        self.http_client = http.client.HTTPSConnection(self.lang + ".wikipedia.org", 443)
+    def _connect_http_client(self) -> http.client.HTTPSConnection:
+        return http.client.HTTPSConnection(self.lang + ".wikipedia.org", 443)
 
     def search_title(self, text: str) -> dict:
         """Searches Wikipedia for article with given text.
@@ -38,7 +34,7 @@ class WikipediaClient:
         :return: search result in JSON format
         :rtype: dict
         """
-        logging.info("Searching wikipedia for text '{0}'".format(text))
+        logging.info("Searching wikipedia for text '{}'".format(text))
         url: str = "/w/api.php"
         http_params: dict = {
             "action": "query",
@@ -50,10 +46,10 @@ class WikipediaClient:
         }
         url_with_params: str = helpers.add_http_parameters(url, http_params)
 
-        self._connect_http_client()
-        self.http_client.request("GET", url_with_params)
-        response: bytes = self.http_client.getresponse().read()
-        self.http_client.close()
+        http_client = self._connect_http_client()
+        http_client.request("GET", url_with_params)
+        response: bytes = http_client.getresponse().read()
+        http_client.close()
 
         return json.loads(response)
 
@@ -65,7 +61,7 @@ class WikipediaClient:
         :return: API response in JSON format
         :rtype: dict
         """
-        logging.info("Searching wikipedia for languages for article with title '{0}'".format(title))
+        logging.info("Searching wikipedia for languages for article with title '{}'".format(title))
         url: str = "/w/api.php"
         http_params: dict = {
             "action": "query",
@@ -76,10 +72,10 @@ class WikipediaClient:
         }
         url_with_params: str = helpers.add_http_parameters(url, http_params)
 
-        self._connect_http_client()
-        self.http_client.request("GET", url_with_params)
-        response: bytes = self.http_client.getresponse().read()
-        self.http_client.close()
+        http_client = self._connect_http_client()
+        http_client.request("GET", url_with_params)
+        response: bytes = http_client.getresponse().read()
+        http_client.close()
 
         return json.loads(response)
 
@@ -93,7 +89,7 @@ class WikipediaClient:
         :return: Link to and title of article in given language or empty strings if not found
         :rtype: tuple
         """
-        logging.info("Searching wikipedia for '{0}' language for article with title '{1}'".format(language, title))
+        logging.info("Searching wikipedia for '{}' language for article with title '{}'".format(language, title))
         url: str = "/w/api.php"
         http_params: dict = {
             "action": "query",
@@ -105,10 +101,10 @@ class WikipediaClient:
         }
         url_with_params: str = helpers.add_http_parameters(url, http_params)
 
-        self._connect_http_client()
-        self.http_client.request("GET", url_with_params)
-        response: bytes = self.http_client.getresponse().read()
-        self.http_client.close()
+        http_client = self._connect_http_client()
+        http_client.request("GET", url_with_params)
+        response: bytes = http_client.getresponse().read()
+        http_client.close()
 
         return WikipediaClient._get_language_info_from_json(json.loads(response), language)
 

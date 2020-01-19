@@ -1,17 +1,16 @@
-"""Contains implementation of MySqlController class."""
+"""Contains implementation of SqlController class."""
 
 from typing import List, Tuple
 
 from sqlalchemy.engine import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, scoped_session, Session
-from sqlalchemy.orm.strategy_options import load_only
 
 from icd_mapper.classes.db.DbController import DbController
 from icd_mapper.classes.db.sql_orm import *
 
 
-class MySqlController(DbController):
-    """Contains implementation of methods defined by DbController using MySQL"""
+class SqlController(DbController):
+    """Contains implementation of methods defined by DbController using SQL"""
 
     engine: Engine
     Session: sessionmaker
@@ -77,7 +76,6 @@ class MySqlController(DbController):
         session = self.db_session()
         id_diseases: List[Icd11] = session.query(Icd11.id_disease) \
             .filter(Icd11.code == icd11) \
-            .options(load_only("id_disease")) \
             .all()
         session.close()
 
@@ -152,7 +150,7 @@ class MySqlController(DbController):
         else:
             result: list = []
             for disease_info in diseases_info:
-                icd10_code: str = MySqlController._join_icd10_code(disease_info[1])
+                icd10_code: str = SqlController._join_icd10_code(disease_info[1])
                 result.append({
                     'diseaseId': disease_info[0].id_disease,
                     'diseaseName': disease_info[0].name,

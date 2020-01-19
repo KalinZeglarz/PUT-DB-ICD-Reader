@@ -107,7 +107,8 @@ if __name__ == '__main__':
     os.chdir(dir_name)
 
     ApiController.load_configuration()
+    ApiController.start_process_pool()
     app.run(
-        host=str(os.getenv('server_host', '0.0.0.0')),
-        port=int(os.getenv('server_port', 5000))
+        host=str(ApiController.configuration["server-parameters"]["host"]),
+        port=int(ApiController.configuration["server-parameters"]["port"])
     )
