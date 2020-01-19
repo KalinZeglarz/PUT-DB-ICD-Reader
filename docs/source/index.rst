@@ -14,4 +14,4 @@ mapped diseases.
 
 .. important:: REST API Documentation
 
-   REST API is documented with Swagger, which is not included here.
+   REST API is documented with Swagger, which you can find `here <https://gunock.github.io/icd-mapper-docs/swagger>`_.
