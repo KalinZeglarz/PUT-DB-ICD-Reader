@@ -11,6 +11,7 @@ mapped diseases.
 
     Docker
     Classes
+    Technologies
 
 .. important:: REST API Documentation
 
