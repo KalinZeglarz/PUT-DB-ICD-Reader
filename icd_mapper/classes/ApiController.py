@@ -64,14 +64,14 @@ def start_process_pool():
 def _check_database_connection() -> Response:
     if not db_controller.check_connection():
         return Response(response="No database connection", status=503)
-    return Response(status=-1)
+    return Response(status=0)
 
 
 def add_or_update_icd10(request) -> Response:
     global icd_mapper, db_controller, wikipedia_mapper, proc_pool
 
     db_connection = _check_database_connection()
-    if db_connection.status != -1:
+    if db_connection.status_code != 0:
         return db_connection
 
     icd10_codes: list = request.get_json()['data']
@@ -103,21 +103,7 @@ def _sync_add_or_update_icd10(icd10_codes: list, additional_languages: list) -> 
     result: dict = {'notFound': []}
     for icd10_code in icd10_codes:
         processing_result: dict = _process_icd10_code(icd10_code, additional_languages, icd_mapper, wikipedia_mapper)
-
-        if processing_result == {}:
-            result['notFound'].append({'icd10': icd10_code})
-            continue
-        if len(processing_result['not_found_languages']) > 0:
-            result['notFound'].append({'icd10': icd10_code, "languages": processing_result['not_found_languages']})
-
-        db_controller.add_disease_entry(processing_result['disease_name'])
-        id_disease: int = db_controller.get_disease_id_by_name(processing_result['disease_name'])
-        db_controller.add_icd_codes(id_disease, icd_mapper.split_icd_10_code(icd10_code),
-                                    processing_result['icd11_code'])
-
-        for wiki_info in processing_result['wiki_infos']:
-            processing_result['found_languages'].append(wiki_info[0])
-            db_controller.add_wiki_info(id_disease, wiki_info[0], wiki_info[1], wiki_info[2])
+        result.update(_process_result(processing_result, icd10_code))
     return result
 
 
@@ -125,21 +111,44 @@ def _process_pool_results(pool_results: dict, icd10_codes) -> dict:
     result: dict = {'notFound': []}
     for icd10_code in icd10_codes:
         pool_result: dict = pool_results[icd10_code].get()
-
-        if pool_result == {}:
-            result['notFound'].append({'icd10': icd10_code})
-            continue
-        if len(pool_result['not_found_languages']) > 0:
-            result['notFound'].append({'icd10': icd10_code, "languages": pool_result['not_found_languages']})
-
-        db_controller.add_disease_entry(pool_result['disease_name'])
-        id_disease: int = db_controller.get_disease_id_by_name(pool_result['disease_name'])
-        db_controller.add_icd_codes(id_disease, icd_mapper.split_icd_10_code(icd10_code), pool_result['icd11_code'])
-
-        for wiki_info in pool_result['wiki_infos']:
-            pool_result['found_languages'].append(wiki_info[0])
-            db_controller.add_wiki_info(id_disease, wiki_info[0], wiki_info[1], wiki_info[2])
+        result.update(_process_result(pool_result, icd10_code))
     return result
+
+
+def _process_result(processing_result: dict, icd10_code: str) -> dict:
+    result: dict = {'notFound': []}
+
+    if processing_result == {}:
+        result['notFound'].append({'icd10_code': icd10_code})
+        return result
+    if len(processing_result['not_found_languages']) > 0:
+        result['notFound'].append({'icd10_code': icd10_code, "languages": processing_result['not_found_languages']})
+
+    _add_disease_and_codes(processing_result['disease_name'], icd10_code, processing_result['icd11_code'])
+
+    id_disease: int = db_controller.get_disease_id_by_name(processing_result['disease_name'])
+    for parent in processing_result['relations']['parent']:
+        _add_disease_and_codes(parent['disease_name'], parent['icd10_code'], parent['icd11_code'])
+        id_disease_rel: int = db_controller.get_disease_id_by_icd10(parent['icd10_code'])[0]
+        db_controller.add_disease_relation(id_disease, id_disease_rel, "child")
+        db_controller.add_disease_relation(id_disease_rel, id_disease, "parent")
+
+    for child in processing_result['relations']['children']:
+        _add_disease_and_codes(child['disease_name'], child['icd10_code'], child['icd11_code'])
+        id_disease_rel: int = db_controller.get_disease_id_by_icd10(child['icd10_code'])[0]
+        db_controller.add_disease_relation(id_disease, id_disease_rel, "parent")
+        db_controller.add_disease_relation(id_disease_rel, id_disease, "child")
+
+    for wiki_info in processing_result['wiki_infos']:
+        processing_result['found_languages'].append(wiki_info[0])
+        db_controller.add_wiki_info(id_disease, wiki_info[0], wiki_info[1], wiki_info[2])
+    return result
+
+
+def _add_disease_and_codes(disease_name: str, icd10_code: str, icd11_code: str):
+    db_controller.add_disease_entry(disease_name)
+    id_disease: int = db_controller.get_disease_id_by_name(disease_name)
+    db_controller.add_icd_codes(id_disease, icd10_code, icd11_code)
 
 
 def _process_icd10_code(icd10_code: str, additional_languages: list, icd_mapper, wikipedia_mapper) -> dict:
@@ -153,6 +162,7 @@ def _process_icd10_code(icd10_code: str, additional_languages: list, icd_mapper,
     wiki_infos: list = wikipedia_mapper.get_disease_wikipedia_data(icd10_code, additional_languages)
     result['disease_name'] = disease_name
     result['wiki_infos'] = wiki_infos
+    result['relations'] = icd_mapper.get_icd_10_relations(icd10_code)
 
     found_languages: list = []
     for wiki_info in wiki_infos:
@@ -168,10 +178,13 @@ def _process_icd10_code(icd10_code: str, additional_languages: list, icd_mapper,
 
 def get_icd10(request, code: str):
     db_connection = _check_database_connection()
-    if db_connection.status != -1:
+    if db_connection.status_code != 0:
         return db_connection
+    if not db_controller.get_disease_id_by_icd10(code):
+        return Response(status=404)
 
     response_format: str = request.args.get('format')
+
     result: list = db_controller.get_icd10_info(code)
 
     if not result:
@@ -185,11 +198,14 @@ def get_icd10(request, code: str):
 
 def get_icd11(request, code: str):
     db_connection = _check_database_connection()
-    if db_connection.status != -1:
+    if db_connection.status_code != 0:
         return db_connection
+    if not db_controller.get_disease_id_by_icd11(code):
+        return Response(status=404)
 
     response_format: str = request.args.get('format')
     result: list = db_controller.get_icd11_info(code)
+
     if not result:
         return Response(status=404)
 
@@ -201,7 +217,7 @@ def get_icd11(request, code: str):
 
 def get_disease(request, id_disease: int):
     db_connection = _check_database_connection()
-    if db_connection.status != -1:
+    if db_connection.status_code != 0:
         return db_connection
 
     response_format: str = request.args.get('format')
@@ -217,7 +233,7 @@ def get_disease(request, id_disease: int):
 
 def add_additional_info(request) -> Response:
     db_connection = _check_database_connection()
-    if db_connection.status != -1:
+    if db_connection.status_code != 0:
         return db_connection
 
     data: dict = request.get_json()
@@ -231,7 +247,7 @@ def add_additional_info(request) -> Response:
 
 def modify_additional_info(request) -> Response:
     db_connection = _check_database_connection()
-    if db_connection.status != -1:
+    if db_connection.status_code != 0:
         return db_connection
 
     data: dict = request.get_json()
@@ -245,7 +261,7 @@ def modify_additional_info(request) -> Response:
 
 def delete_additional_info(id_disease: int) -> Response:
     db_connection = _check_database_connection()
-    if db_connection.status != -1:
+    if db_connection.status_code != 0:
         return db_connection
 
     db_controller.delete_additional_info(id_disease)

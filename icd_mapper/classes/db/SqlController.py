@@ -58,16 +58,9 @@ class SqlController(DbController):
             return int(id_disease[0].id_disease)
 
     def get_disease_id_by_icd10(self, icd10: str) -> list:
-        icd10_split: list = icd10.split('.')
-        while len(icd10_split) < 3:
-            icd10_split.append('')
-
         session = self.db_session()
         icd10_list: List[Icd10] = session.query(Icd10.id_disease) \
-            .filter(Icd10.category == icd10_split[0],
-                    Icd10.details.startswith(icd10_split[1]),
-                    Icd10.extension.startswith(icd10_split[2])) \
-            .all()
+            .filter(Icd10.code.startswith(icd10)).all()
         session.close()
 
         if len(icd10_list) == 0:
@@ -106,8 +99,8 @@ class SqlController(DbController):
         session.commit()
         session.close()
 
-    def add_icd_codes(self, id_disease: int, icd10_code: list, icd11_code: str):
-        icd10 = Icd10(id_disease=id_disease, category=icd10_code[0], details=icd10_code[1], extension=icd10_code[2])
+    def add_icd_codes(self, id_disease: int, icd10_code: str, icd11_code: str):
+        icd10 = Icd10(id_disease=id_disease, code=icd10_code)
         icd11 = Icd11(id_disease=id_disease, code=icd11_code)
 
         session: Session = self.db_session()
@@ -153,41 +146,32 @@ class SqlController(DbController):
         session: Session = self.db_session()
         for id_disease in id_diseases:
             disease: Disease = session.query(Disease) \
-                .filter(Disease.id_disease == id_disease)[0]
+                .filter(Disease.id_disease == id_disease).first()
             icd10: Icd10 = session.query(Icd10) \
-                .filter(Icd10.id_disease == id_disease)[0]
+                .filter(Icd10.id_disease == id_disease).first()
             icd11: Icd11 = session.query(Icd11) \
-                .filter(Icd11.id_disease == id_disease)[0]
+                .filter(Icd11.id_disease == id_disease).first()
             diseases_info.append((disease, icd10, icd11))
         session.close()
-        if len(diseases_info) == 0:
+        if not diseases_info:
             return []
         else:
             result: list = []
             for disease_info in diseases_info:
-                icd10_code: str = SqlController._join_icd10_code(disease_info[1])
+                if disease_info[0] is None:
+                    continue
                 result.append({
                     'diseaseId': disease_info[0].id_disease,
                     'diseaseName': disease_info[0].name,
                     'codes': {
-                        'icd10': icd10_code,
+                        'icd10': disease_info[1].code,
                         'icd11': disease_info[2].code,
                     },
+                    'relations': self.get_disease_relations(disease_info[0].id_disease),
                     'wikipedia': self.get_wiki_info(disease_info[0].id_disease),
                     'additionalInfo': self.get_additional_info(disease_info[0].id_disease)
                 })
             return result
-
-    @staticmethod
-    def _join_icd10_code(icd10: Icd10):
-        icd10_code: str = ''
-        if icd10.category != '':
-            icd10_code += icd10.category
-            if icd10.details != '':
-                icd10_code += '.' + icd10.details
-                if icd10.extension != '':
-                    icd10_code += '.' + icd10.extension
-        return icd10_code
 
     def get_icd10_info(self, icd10_code: str) -> list:
         id_diseases: list = self.get_disease_id_by_icd10(icd10_code)
@@ -225,6 +209,31 @@ class SqlController(DbController):
 
         session.commit()
         session.close()
+
+    def add_disease_relation(self, id_disease_1: int, id_disease_2: int, rel_type: str) -> None:
+        session: Session = self.db_session()
+        rel_on_db: DiseaseRel = session.query(DiseaseRel) \
+            .filter(DiseaseRel.id_disease_1 == id_disease_1, DiseaseRel.id_disease_2 == id_disease_2).first()
+        if not rel_on_db:
+            disease_rel = DiseaseRel(id_disease_1=id_disease_1, id_disease_2=id_disease_2, rel_type=rel_type)
+            session.add(disease_rel)
+        else:
+            rel_on_db.rel_type = rel_type
+        session.commit()
+        session.close()
+
+    def get_disease_relations(self, id_disease_1: int) -> list:
+        session: Session = self.db_session()
+        disease_rels: List[DiseaseRel] = session.query(DiseaseRel) \
+            .filter(DiseaseRel.id_disease_2 == id_disease_1).all()
+        session.close()
+        result: list = []
+        for disease_rel in disease_rels:
+            result.append({
+                'id_disease': disease_rel.id_disease_1,
+                'type': disease_rel.rel_type
+            })
+        return result
 
     def export_to_prolog(self) -> str:
         return ''

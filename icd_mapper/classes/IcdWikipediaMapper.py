@@ -37,27 +37,27 @@ class IcdWikipediaMapper:
         file.close()
         self.icd_chapter_map = json.loads(json_text)
 
-    def _get_icd_10_article_chapter(self, icd_10_code: str) -> str:
+    def _get_icd_10_article_chapter(self, icd10_code: str) -> str:
         for entry in self.icd_chapter_map["codeSpaces"]:
             code_space: str = entry["codeSpace"]
             code_space_search = re.search("([A-Z])([0-9]+)-([A-Z])([0-9]+)", code_space, re.IGNORECASE)
-            icd_10_code_search = re.search("([A-Z])([0-9]+)(\\.[0-9]+)*", icd_10_code, re.IGNORECASE)
+            icd10_code_search = re.search("([A-Z])([0-9]+)(\\.[0-9]+)*", icd10_code, re.IGNORECASE)
             code_letters: list = [code_space_search.group(1), code_space_search.group(3)]
             code_numbers: list = [code_space_search.group(2), code_space_search.group(4)]
-            if code_letters[0] == code_letters[1] and code_letters[0] == icd_10_code_search.group(1):
-                if int(code_numbers[0]) <= int(icd_10_code_search.group(2)) <= int(code_numbers[1]):
+            if code_letters[0] == code_letters[1] and code_letters[0] == icd10_code_search.group(1):
+                if int(code_numbers[0]) <= int(icd10_code_search.group(2)) <= int(code_numbers[1]):
                     return entry["wikipediaChapter"]
             else:
-                if code_letters[0] == icd_10_code_search.group(1):
-                    if int(code_numbers[0]) <= int(icd_10_code_search.group(2)) <= 99:
+                if code_letters[0] == icd10_code_search.group(1):
+                    if int(code_numbers[0]) <= int(icd10_code_search.group(2)) <= 99:
                         return entry["wikipediaChapter"]
-                elif code_letters[1] == icd_10_code_search.group(1):
-                    if 0 <= int(icd_10_code_search.group(2)) <= int(code_numbers[1]):
+                elif code_letters[1] == icd10_code_search.group(1):
+                    if 0 <= int(icd10_code_search.group(2)) <= int(code_numbers[1]):
                         return entry["wikipediaChapter"]
         return "not found"
 
-    def _get_icd_chapter_article_title(self, icd_10_code: str) -> str:
-        icd_10_wikipedia_chapter = self._get_icd_10_article_chapter(icd_10_code)
+    def _get_icd_chapter_article_title(self, icd10_code: str) -> str:
+        icd_10_wikipedia_chapter = self._get_icd_10_article_chapter(icd10_code)
         if icd_10_wikipedia_chapter == "not found":
             return "not found"
         icd_10_chapter_search_str: str = "Chapter {} of ICD-10 deals with".format(icd_10_wikipedia_chapter)
@@ -75,11 +75,11 @@ class IcdWikipediaMapper:
             self.wikipedia_pages_cache.popitem(False)
         return result
 
-    def get_disease_wikipedia_data(self, icd_10_code: str, languages: list = None) -> list:
+    def get_disease_wikipedia_data(self, icd10_code: str, languages: list = None) -> list:
         """Searches for article about disease with given ICD-10 code.
 
-        :param icd_10_code: ICD-10 code
-        :type icd_10_code: str
+        :param icd10_code: ICD-10 code
+        :type icd10_code: str
         :param languages: Article languages to be searched for (examples: en, es, ru, pl)
         :type languages: list
         :return: article title and link to english and polish version of article
@@ -87,10 +87,10 @@ class IcdWikipediaMapper:
         """
         if languages is None:
             languages = []
-        icd_10_code = icd_10_code.upper()
-        icd_code_upper: str = icd_10_code.upper()
+        icd10_code = icd10_code.upper()
+        icd_code_upper: str = icd10_code.upper()
 
-        icd_chapter_article_title: str = self._get_icd_chapter_article_title(icd_10_code)
+        icd_chapter_article_title: str = self._get_icd_chapter_article_title(icd10_code)
         if icd_chapter_article_title == 'not found':
             return []
 
@@ -113,15 +113,15 @@ class IcdWikipediaMapper:
                 if language_url != "":
                     result.append((language, language_title, language_url))
 
-        logging.debug("Article title for ICD-10 code '{}' is '{}'".format(icd_10_code, title))
-        logging.debug("Articles urls for ICD-10 code '{}' is '{}'".format(icd_10_code, result))
+        logging.debug("Article title for ICD-10 code '{}' is '{}'".format(icd10_code, title))
+        logging.debug("Articles urls for ICD-10 code '{}' is '{}'".format(icd10_code, result))
         return result
 
-    def get_diseases_wikipedia_data(self, icd_10_code_list: list, languages: list = None) -> list:
+    def get_diseases_wikipedia_data(self, icd10_code_list: list, languages: list = None) -> list:
         """Searches for articles about diseases with given ICD-10 codes.
 
-        :param icd_10_code_list: list of ICD-10 codes
-        :type icd_10_code_list: list
+        :param icd10_code_list: list of ICD-10 codes
+        :type icd10_code_list: list
         :param languages: Article languages to be searched for (examples: en, es, ru, pl)
         :type languages: list
         :return: list of article title and link to english and other versions of article
@@ -130,12 +130,12 @@ class IcdWikipediaMapper:
         if languages is None:
             languages = []
         result: list = []
-        for icd_10_code in icd_10_code_list:
-            data_search_result: list = self.get_disease_wikipedia_data(icd_10_code, languages)
+        for icd10_code in icd10_code_list:
+            data_search_result: list = self.get_disease_wikipedia_data(icd10_code, languages)
             if not data_search_result:
-                logging.info("Code '{}' not found".format(icd_10_code))
+                logging.info("Code '{}' not found".format(icd10_code))
             elif data_search_result[0]:
                 result.append(data_search_result)
             elif data_search_result[0] == "":
-                logging.info("Code '{}' article not found".format(icd_10_code))
+                logging.info("Code '{}' article not found".format(icd10_code))
         return result

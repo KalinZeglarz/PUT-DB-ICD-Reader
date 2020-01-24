@@ -18,13 +18,10 @@ class Icd10(Base):
     __tablename__ = 'ICD_10'
 
     id_disease = Column(Integer, ForeignKey("DISEASES.id_disease"), primary_key=True, nullable=False)
-    category = Column(String)
-    details = Column(String)
-    extension = Column(String)
+    code = Column(String)
 
     def __repr__(self):
-        return "<Icd10(CATEGORY='{}', DETAILS='{}', EXTENSION='{}')>".format(self.category, self.details,
-                                                                             self.extension)
+        return "<Icd10(CODE='{}'')>".format(self.code)
 
 
 class Icd11(Base):
@@ -52,11 +49,26 @@ class Wiki(Base):
 class AdditionalInfo(Base):
     __tablename__ = 'ADDITIONAL_INFO'
 
-    id_disease = Column(Integer, ForeignKey("DISEASES.id_disease"), nullable=False)
     id_additional_info = Column(Integer, primary_key=True, nullable=False)
+    id_disease = Column(Integer, ForeignKey("DISEASES.id_disease"), nullable=False)
     type = Column(String)
     author = Column(String)
     info = Column(String)
 
     def __repr__(self):
         return "<Icd10(TYPE='{}', AUTHOR='{}', INFO='{}')>".format(self.type, self.author, self.info)
+
+
+class DiseaseRel(Base):
+    __tablename__ = 'DISEASES_REL'
+
+    id_rel = Column(Integer, primary_key=True, nullable=False)
+    id_disease_1 = Column(Integer, ForeignKey("DISEASES.id_disease"), nullable=False)
+    id_disease_2 = Column(Integer, ForeignKey("DISEASES.id_disease"), nullable=False)
+    rel_type = Column(String, nullable=False)
+
+    def __repr__(self):
+        return "<Icd10(ID_REL={}, ID_DISEASE_1={}, ID_DISEASE_2={}, REL_TYPE='{}')>".format(self.id_rel,
+                                                                                            self.id_disease_1,
+                                                                                            self.id_disease_2,
+                                                                                            self.rel_type)

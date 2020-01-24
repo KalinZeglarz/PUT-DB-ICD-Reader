@@ -1,6 +1,6 @@
 create table DISEASES
 (
-    ID_DISEASE mediumint auto_increment,
+    ID_DISEASE mediumint primary key auto_increment,
     NAME       varchar(256) charset utf8 null,
     constraint DISEASES_ID_DISEASE_uindex
         unique (ID_DISEASE),
@@ -8,13 +8,10 @@ create table DISEASES
         unique (NAME)
 );
 
-alter table DISEASES
-    add primary key (ID_DISEASE);
-
 create table ADDITIONAL_INFO
 (
     ID_DISEASE         mediumint    null,
-    ID_ADDITIONAL_INFO mediumint auto_increment,
+    ID_ADDITIONAL_INFO mediumint primary key auto_increment,
     TYPE               varchar(32)  not null,
     AUTHOR             varchar(128) not null,
     INFO               text         not null,
@@ -25,15 +22,10 @@ create table ADDITIONAL_INFO
             on delete cascade
 );
 
-alter table ADDITIONAL_INFO
-    add primary key (ID_ADDITIONAL_INFO);
-
 create table ICD_10
 (
-    ID_DISEASE mediumint               null,
-    CATEGORY   varchar(4) charset utf8 not null,
-    DETAILS    varchar(4) charset utf8 null,
-    EXTENSION  varchar(2) charset utf8 null,
+    ID_DISEASE mediumint                null,
+    CODE       varchar(20) charset utf8 not null,
     constraint ICD_10_ID_DISEASE_uindex
         unique (ID_DISEASE),
     constraint ICD_10_DISEASES_ID_DISEASE_fk
@@ -60,5 +52,21 @@ create table WIKI
     LINK       varchar(512) null,
     constraint WIKI_TEMP_DISEASES_ID_DISEASE_fk
         foreign key (ID_DISEASE) references DISEASES (ID_DISEASE)
+            on delete cascade
+);
+
+create table DISEASES_REL
+(
+    ID_REL       int primary key auto_increment,
+    ID_DISEASE_1 mediumint   not null,
+    ID_DISEASE_2 mediumint   not null,
+    REL_TYPE     varchar(64) not null,
+    constraint DISEASES_REL_ID_REL_uindex
+        unique (ID_REL),
+    constraint DISEASES_REL_DISEASES_ID_DISEASE_1_ID_DISEASE_fk
+        foreign key (ID_DISEASE_1) references DISEASES (ID_DISEASE)
+            on delete cascade,
+    constraint DISEASES_REL_DISEASES_ID_DISEASE_2_ID_DISEASE_fk
+        foreign key (ID_DISEASE_2) references DISEASES (ID_DISEASE)
             on delete cascade
 );

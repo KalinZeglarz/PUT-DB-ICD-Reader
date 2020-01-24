@@ -131,15 +131,15 @@ class DbController:
         pass
 
     @abstractmethod
-    def add_icd_codes(self, id_disease: int, icd_10_code: list, icd_11_code: str) -> None:
+    def add_icd_codes(self, id_disease: int, icd10_code: str, icd11_code: str) -> None:
         """Adds ICD-10 and corresponding ICD-11 codes to database.
 
         :param id_disease: database id of disease
         :type id_disease: int
-        :param icd_10_code: ICD-10 code divided into category, details and extension
-        :type icd_10_code: list
-        :param icd_11_code: ICD-11 code
-        :type icd_11_code: str
+        :param icd10_code: ICD-10 code
+        :type icd10_code: str
+        :param icd11_code: ICD-11 code
+        :type icd11_code: str
         :rtype: None
         """
         pass
@@ -183,6 +183,31 @@ class DbController:
         :param id_info: database id of additional information
         :type id_info: int
         :rtype: None
+        """
+        pass
+
+    @abstractmethod
+    def add_disease_relation(self, id_disease_1: int, id_disease_2: int, rel_type: str) -> None:
+        """Adds relation between two diseases.
+
+        :param id_disease_1: database id of disease
+        :type id_disease_1: int
+        :param id_disease_2: database id of disease
+        :type id_disease_2: int
+        :param rel_type: relation type (examples: parent, child)
+        :type rel_type: str
+        :rtype: None
+        """
+        pass
+
+    @abstractmethod
+    def get_disease_relations(self, id_disease_1: int) -> list:
+        """Searches database for relation of given disease.
+
+        :param id_disease_1: database id of disease
+        :type id_disease_1: int
+        :return: list of relations for given disease
+        :rtype: list
         """
         pass
 

@@ -26,7 +26,8 @@ class IcdMapper:
     def __del__(self):
         pass
 
-    def _connect_http_client(self) -> http.client.HTTPSConnection:
+    @staticmethod
+    def _connect_http_client() -> http.client.HTTPSConnection:
         return http.client.HTTPSConnection("id.who.int", 443)
 
     def _get_token(self, client_id, client_secret):
@@ -49,32 +50,71 @@ class IcdMapper:
         self.token = json.loads(res.read())
         http_client.close()
 
-    def get_icd_10_name(self, icd_10_code: str) -> str:
+    def get_icd_10_name(self, icd10_code: str) -> str:
         """Retrieves name of disease using ICD-10 code.
 
-        :param icd_10_code: ICD-10 code
-        :type icd_10_code:  str
+        :param icd10_code: ICD-10 code
+        :type icd10_code:  str
         :return: Disease name for given ICD-10 code
         :rtype: str
         """
-        icd_10_code = icd_10_code.upper()
+        icd10_code = icd10_code.upper()
         headers = {
             "accept": "application/json",
             "Accept-Language": "en",
             "API-Version": "v2",
             "Authorization": self.token["token_type"] + " " + self.token["access_token"],
         }
-        logging.info('Searching for name of ICD-10 code: ' + icd_10_code)
-        url: str = "/icd/release/10/2016/" + icd_10_code
+        logging.info('Searching for name of ICD-10 code: ' + icd10_code)
+        url: str = "/icd/release/10/2016/" + icd10_code
         http_client = self._connect_http_client()
         http_client.request("GET", url, headers=headers)
         res = http_client.getresponse()
         if res.status == 404:
-            return ""
+            return ''
         res_json: dict = json.loads(res.read())
         return res_json["title"]["@value"]
 
-    def _get_icd_11_code(self, disease_name) -> str:
+    def get_icd_10_relations(self, icd10_code: str) -> dict:
+        """Retrieves relations of disease using ICD-10 code.
+
+        :param icd10_code: ICD-10 code
+        :type icd10_code:  str
+        :return: Disease relations for given ICD-10 code
+        :rtype: dict
+        """
+        icd10_code = icd10_code.upper()
+        headers = {
+            "accept": "application/json",
+            "Accept-Language": "en",
+            "API-Version": "v2",
+            "Authorization": self.token["token_type"] + " " + self.token["access_token"],
+        }
+        logging.info('Searching for name of ICD-10 code: ' + icd10_code)
+        url: str = "/icd/release/10/2016/" + icd10_code
+        http_client = self._connect_http_client()
+        http_client.request("GET", url, headers=headers)
+        res = http_client.getresponse()
+        if res.status == 404:
+            return {}
+        res_json: dict = json.loads(res.read())
+        return {
+            'parent': self._parse_parent_children_list(res_json.get("parent", [])),
+            'children': self._parse_parent_children_list(res_json.get("child", []))
+        }
+
+    def _parse_parent_children_list(self, link_list: list) -> list:
+        result: list = []
+        for link in link_list:
+            icd10_code: str = link.split('/')[-1:][0]
+            result.append({
+                'icd10_code': icd10_code,
+                'icd11_code': self.icd_10_to_icd_11(icd10_code),
+                'disease_name': self.get_icd_10_name(icd10_code)
+            })
+        return result
+
+    def _get_icd11_code(self, disease_name) -> str:
         headers = {
             "accept": "application/json",
             "Accept-Language": "en",
@@ -98,31 +138,18 @@ class IcdMapper:
         else:
             return ""
 
-    def icd_10_to_icd_11(self, icd_10_code: str) -> str:
+    def icd_10_to_icd_11(self, icd10_code: str) -> str:
         """Maps ICD-10 code to ICD-11 code via WHO ICD API.
 
-        :param icd_10_code: ICD-10 code
-        :type icd_10_code: str
+        :param icd10_code: ICD-10 code
+        :type icd10_code: str
         :return: ICD-11 code
+        :rtype: str
         """
-        disease_name: str = self.get_icd_10_name(icd_10_code)
-        logging.info("Disease name for ICD-10 code '{}' is '{}'".format(icd_10_code, disease_name))
-        if disease_name == "":
-            return ""
-        icd_11_code: str = self._get_icd_11_code(disease_name)
-        logging.info("Mapped ICD-10 code '{}' to ICD-11 code '{}'".format(icd_10_code, icd_11_code))
-        return icd_11_code
-
-    def split_icd_10_code(self, icd_10_code: str) -> list:
-        """Splits ICD-10 code int category, details and extension fragments.
-
-        :param icd_10_code: ICD-10 code
-        :type icd_10_code: str
-        :return: split ICD-10 code
-        :rtype: list
-        """
-        icd_10_code = icd_10_code.upper()
-        result: list = icd_10_code.split('.')
-        while len(result) < 3:
-            result.append('')
-        return result
+        disease_name: str = self.get_icd_10_name(icd10_code)
+        logging.info("Disease name for ICD-10 code '{}' is '{}'".format(icd10_code, disease_name))
+        if disease_name == '':
+            return ''
+        icd11_code: str = self._get_icd11_code(disease_name)
+        logging.info("Mapped ICD-10 code '{}' to ICD-11 code '{}'".format(icd10_code, icd11_code))
+        return icd11_code

@@ -35,7 +35,7 @@ class TestSqlController(TestCase):
 
     def test_add_icd_codes(self):
         id_disease: int = self.db_controller.get_disease_id_by_name('unit_test')
-        self.db_controller.add_icd_codes(id_disease, ['unit', 'test', 'in'], 'code11')
+        self.db_controller.add_icd_codes(id_disease, 'unit.test.in', 'code11')
 
     def test_get_icd10_info(self):
         disease_info: list = self.db_controller.get_icd10_info('unit.test.in')
@@ -55,8 +55,7 @@ class TestSqlController(TestCase):
                     'title': 'pol_title',
                     'link': 'pol_url'
                 }
-            ],
-            "additionalInfo": []
+            ]
         }
         self.assertDictEqual(expected_disease_info["codes"], disease_info[0]["codes"])
         self.assertEquals(expected_disease_info["diseaseName"], disease_info[0]["diseaseName"])
@@ -80,8 +79,7 @@ class TestSqlController(TestCase):
                     'title': 'pol_title',
                     'link': 'pol_url'
                 }
-            ],
-            "additionalInfo": []
+            ]
         }
         self.assertDictEqual(expected_disease_info["codes"], disease_info[0]["codes"])
         self.assertEquals(expected_disease_info["diseaseName"], disease_info[0]["diseaseName"])
