@@ -109,6 +109,6 @@ if __name__ == '__main__':
     ApiController.load_configuration()
     ApiController.start_process_pool()
     app.run(
-        host=str(ApiController.configuration["server-parameters"]["host"]),
-        port=int(ApiController.configuration["server-parameters"]["port"])
+        host=str(ApiController.configuration["server"]["host"]),
+        port=int(ApiController.configuration["server"]["port"])
     )

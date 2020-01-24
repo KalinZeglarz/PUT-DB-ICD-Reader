@@ -15,10 +15,10 @@ class TestSqlController(TestCase):
             configuration = json.load(f)
 
         self.db_controller = SqlController(
-            database=configuration['db-parameters']['database'],
-            host=configuration['db-parameters']['host'],
-            user=configuration['db-parameters']['user'],
-            password=configuration['db-parameters']['password']
+            database=configuration['db']['database'],
+            host=configuration['db']['host'],
+            user=configuration['db']['user'],
+            password=configuration['db']['password']
         )
 
     def test_add_disease_entry(self):

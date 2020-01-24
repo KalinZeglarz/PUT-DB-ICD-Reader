@@ -38,10 +38,10 @@ def load_configuration():
         logging.info("Loaded configuration from path 'resources/configuration.json'")
     configuration = _check_env_variables('', configuration)
     db_controller = SqlController(
-        database=configuration['db-parameters']['database'],
-        host=configuration['db-parameters']['host'],
-        user=configuration['db-parameters']['user'],
-        password=configuration['db-parameters']['password']
+        database=configuration['db']['database'],
+        host=configuration['db']['host'],
+        user=configuration['db']['user'],
+        password=configuration['db']['password']
     )
     icd_mapper = IcdMapper(
         client_id=configuration['icd-api-credentials']['client-id'],
@@ -53,7 +53,7 @@ def load_configuration():
 def start_process_pool():
     global proc_pool, configuration
 
-    pool_size = int(configuration["server-parameters"]["pool-size"])
+    pool_size = int(configuration["server"]["pool-size"])
     proc_pool = Pool(pool_size)
     logging.info("Started process pool with {} processes".format(pool_size))
 
