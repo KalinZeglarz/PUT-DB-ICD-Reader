@@ -19,6 +19,15 @@ class DbController:
         pass
 
     @abstractmethod
+    def check_connection(self) -> bool:
+        """Adds disease to database.
+
+        :return: True if connected, otherwise False
+        :rtype: bool
+        """
+        pass
+
+    @abstractmethod
     def add_disease_entry(self, name: str) -> None:
         """Adds disease to database.
 

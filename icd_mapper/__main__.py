@@ -26,8 +26,8 @@ models: ApiModels = ApiModels(api)
 @ns_mapper.response(201, 'Created')
 @ns_mapper.response(400, 'Bad Request')
 @ns_mapper.response(500, 'Internal Server Error')
+@ns_mapper.response(503, 'Service Unavailable')
 class MapIcd10(Resource):
-
     def post(self):
         """This endpoint maps given ICD-10 codes to ICD-11 codes and find Wikipedia articles."""
         return ApiController.add_or_update_icd10(request)
@@ -42,6 +42,7 @@ class MapIcd10(Resource):
 @ns_mapper.response(200, 'Success')
 @ns_mapper.response(404, 'Not Found')
 @ns_mapper.response(500, 'Internal Server Error')
+@ns_mapper.response(503, 'Service Unavailable')
 class GetIcd10(Resource):
     @ns_mapper.doc(params={'format': 'Response data format (json, json-pretty)'})
     def get(self, code: str):
@@ -55,6 +56,7 @@ class GetIcd10(Resource):
 @ns_mapper.response(200, 'Success')
 @ns_mapper.response(404, 'Not Found')
 @ns_mapper.response(500, 'Internal Server Error')
+@ns_mapper.response(503, 'Service Unavailable')
 class GetIcd11(Resource):
     @ns_mapper.doc(params={'format': 'Response data format (json, json-pretty)'})
     def get(self, code: str):
@@ -68,6 +70,7 @@ class GetIcd11(Resource):
 @ns_mapper.response(200, 'Success')
 @ns_mapper.response(404, 'Not Found')
 @ns_mapper.response(500, 'Internal Server Error')
+@ns_mapper.response(503, 'Service Unavailable')
 class GetDisease(Resource):
     @ns_mapper.doc(params={'format': 'Response data format (json, json-pretty)'})
     def get(self, id: int):
@@ -79,6 +82,7 @@ class GetDisease(Resource):
 @ns_additional_info.response(201, 'Created')
 @ns_additional_info.response(400, 'Bad Request')
 @ns_additional_info.response(500, 'Internal Server Error')
+@ns_mapper.response(503, 'Service Unavailable')
 class AdditionalInfo(Resource):
     @ns_additional_info.expect(models.additional_info_post_body)
     def post(self):
@@ -94,6 +98,7 @@ class AdditionalInfo(Resource):
 @ns_additional_info.route('/<id>')
 @ns_additional_info.response(200, 'Success')
 @ns_additional_info.response(500, 'Internal Server Error')
+@ns_mapper.response(503, 'Service Unavailable')
 class AdditionalInfo(Resource):
     def delete(self, id: int):
         """This endpoint deletes additional info with given database id."""

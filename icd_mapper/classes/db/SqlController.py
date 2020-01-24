@@ -29,6 +29,14 @@ class SqlController(DbController):
     def __del__(self):
         self.engine.dispose()
 
+    def check_connection(self) -> bool:
+        from sqlalchemy.exc import DatabaseError
+        try:
+            self.engine.connect()
+        except DatabaseError:
+            return False
+        return True
+
     def add_disease_entry(self, name: str) -> None:
         session: Session = self.db_session()
         if not session.query(Disease).filter(Disease.name == name).first():

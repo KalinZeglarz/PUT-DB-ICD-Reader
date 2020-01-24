@@ -61,11 +61,18 @@ def start_process_pool():
         logging.info("Not using process pool")
 
 
+def _check_database_connection() -> Response:
+    if not db_controller.check_connection():
+        return Response(response="No database connection", status=503)
+    return Response(status=-1)
+
+
 def add_or_update_icd10(request) -> Response:
     global icd_mapper, db_controller, wikipedia_mapper, proc_pool
 
-    if 'data' not in request.get_json():
-        return Response(status=400)
+    db_connection = _check_database_connection()
+    if db_connection.status != -1:
+        return db_connection
 
     icd10_codes: list = request.get_json()['data']
     additional_languages: list = request.get_json()['additionalLanguages']
@@ -160,6 +167,10 @@ def _process_icd10_code(icd10_code: str, additional_languages: list, icd_mapper,
 
 
 def get_icd10(request, code: str):
+    db_connection = _check_database_connection()
+    if db_connection.status != -1:
+        return db_connection
+
     response_format: str = request.args.get('format')
     result: list = db_controller.get_icd10_info(code)
 
@@ -173,6 +184,10 @@ def get_icd10(request, code: str):
 
 
 def get_icd11(request, code: str):
+    db_connection = _check_database_connection()
+    if db_connection.status != -1:
+        return db_connection
+
     response_format: str = request.args.get('format')
     result: list = db_controller.get_icd11_info(code)
     if not result:
@@ -185,6 +200,10 @@ def get_icd11(request, code: str):
 
 
 def get_disease(request, id_disease: int):
+    db_connection = _check_database_connection()
+    if db_connection.status != -1:
+        return db_connection
+
     response_format: str = request.args.get('format')
     result: list = db_controller.get_disease_info([id_disease])
     if not result:
@@ -197,6 +216,10 @@ def get_disease(request, id_disease: int):
 
 
 def add_additional_info(request) -> Response:
+    db_connection = _check_database_connection()
+    if db_connection.status != -1:
+        return db_connection
+
     data: dict = request.get_json()
 
     if not {'diseaseId', 'type', 'author', 'info'} <= request.get_json().keys():
@@ -207,6 +230,10 @@ def add_additional_info(request) -> Response:
 
 
 def modify_additional_info(request) -> Response:
+    db_connection = _check_database_connection()
+    if db_connection.status != -1:
+        return db_connection
+
     data: dict = request.get_json()
 
     if not {'infoId', 'type', 'author', 'info'} <= request.get_json().keys():
@@ -217,5 +244,9 @@ def modify_additional_info(request) -> Response:
 
 
 def delete_additional_info(id_disease: int) -> Response:
+    db_connection = _check_database_connection()
+    if db_connection.status != -1:
+        return db_connection
+
     db_controller.delete_additional_info(id_disease)
     return Response(status=200)
