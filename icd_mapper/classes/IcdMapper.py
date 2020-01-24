@@ -69,6 +69,8 @@ class IcdMapper:
         http_client = self._connect_http_client()
         http_client.request("GET", url, headers=headers)
         res = http_client.getresponse()
+        if res.status == 404:
+            return ""
         res_json: dict = json.loads(res.read())
         return res_json["title"]["@value"]
 
@@ -105,6 +107,8 @@ class IcdMapper:
         """
         disease_name: str = self.get_icd_10_name(icd_10_code)
         logging.info("Disease name for ICD-10 code '{}' is '{}'".format(icd_10_code, disease_name))
+        if disease_name == "":
+            return ""
         icd_11_code: str = self._get_icd_11_code(disease_name)
         logging.info("Mapped ICD-10 code '{}' to ICD-11 code '{}'".format(icd_10_code, icd_11_code))
         return icd_11_code

@@ -29,15 +29,13 @@ class SqlController(DbController):
     def __del__(self):
         self.engine.dispose()
 
-    def _add_and_commit(self, data):
-        session: Session = self.db_session()
-        session.merge(data)
-        session.commit()
-        session.close()
-
     def add_disease_entry(self, name: str) -> None:
-        disease = Disease(name=name)
-        self._add_and_commit(disease)
+        session: Session = self.db_session()
+        if not session.query(Disease).filter(Disease.name == name).first():
+            disease = Disease(name=name)
+            session.add(disease)
+            session.commit()
+        session.close()
 
     def get_disease_id_by_name(self, name: str) -> int:
         session: Session = self.db_session()
@@ -88,8 +86,17 @@ class SqlController(DbController):
             return result
 
     def add_wiki_info(self, id_disease: int, language: str, title: str, link: str) -> None:
-        wiki = Wiki(id_disease=id_disease, language=language, title=title, link=link)
-        self._add_and_commit(wiki)
+        session: Session = self.db_session()
+        wiki_on_db: Wiki = session.query(Wiki) \
+            .filter(Wiki.id_disease == id_disease, Wiki.language == language).first()
+        if not wiki_on_db:
+            wiki = Wiki(id_disease=id_disease, language=language, title=title, link=link)
+            session.add(wiki)
+        else:
+            wiki_on_db.title = title
+            wiki_on_db.link = link
+        session.commit()
+        session.close()
 
     def add_icd_codes(self, id_disease: int, icd10_code: list, icd11_code: str):
         icd10 = Icd10(id_disease=id_disease, category=icd10_code[0], details=icd10_code[1], extension=icd10_code[2])
@@ -184,7 +191,10 @@ class SqlController(DbController):
 
     def add_additional_info(self, id_disease: int, info_type: str, author: str, info: str) -> None:
         additional_info = AdditionalInfo(id_disease=id_disease, type=info_type, author=author, info=info)
-        self._add_and_commit(additional_info)
+        session: Session = self.db_session()
+        session.merge(additional_info)
+        session.commit()
+        session.close()
 
     def modify_additional_info(self, id_info: int, info_type: str, author: str, info: str) -> None:
         session = self.db_session()

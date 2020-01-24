@@ -3,7 +3,9 @@ create table DISEASES
     ID_DISEASE mediumint auto_increment,
     NAME       varchar(256) charset utf8 null,
     constraint DISEASES_ID_DISEASE_uindex
-        unique (ID_DISEASE)
+        unique (ID_DISEASE),
+    constraint DISEASES_NAME_uindex
+        unique (NAME)
 );
 
 alter table DISEASES
