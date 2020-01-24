@@ -32,11 +32,11 @@ To create container use docker run:
 
 .. rubric:: Configuration
 
-Container must be configurated with environmental variables
+Container must be configured with environmental variables
 to function properly.
 
 * icd_api_credentials_client_id - client id for ICD-11 API
-  authentication (Defualt: none)
+  authentication (Default: none)
 * icd_api_credentials_client_secret - client secret for ICD-11 API
   authentication (Default: none)
 * db_parameters_database - database type (default: mysql+mysqlconnector)
