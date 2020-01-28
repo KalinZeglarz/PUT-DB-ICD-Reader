@@ -10,6 +10,6 @@ ENV server_host="0.0.0.0"
 ENV server_port="5000"
 ENV server_pool_size=10
 WORKDIR /app
-RUN pip install -r requirements.txt
+RUN pip install -r requirements_docker.txt
 EXPOSE 5000
 CMD PYTHONPATH=./icd_mapper python -m icd_mapper

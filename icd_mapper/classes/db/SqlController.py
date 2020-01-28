@@ -32,17 +32,21 @@ class SqlController(DbController):
     def check_connection(self) -> bool:
         from sqlalchemy.exc import DatabaseError
         try:
-            self.engine.connect()
+            connection = self.engine.connect()
+            connection.close()
         except DatabaseError:
             return False
         return True
 
     def add_disease_entry(self, name: str) -> None:
         session: Session = self.db_session()
-        if not session.query(Disease).filter(Disease.name == name).first():
-            disease = Disease(name=name)
+        disease: Disease = session.query(Disease).filter(Disease.name == name).first()
+        if not disease:
+            disease = Disease(name=name.lower())
             session.add(disease)
-            session.commit()
+        elif disease.name != name.lower():
+            disease.name = name.lower()
+        session.commit()
         session.close()
 
     def get_disease_id_by_name(self, name: str) -> int:
@@ -88,20 +92,20 @@ class SqlController(DbController):
 
     def add_wiki_info(self, id_disease: int, language: str, title: str, link: str) -> None:
         session: Session = self.db_session()
-        wiki_on_db: Wiki = session.query(Wiki) \
+        wiki: Wiki = session.query(Wiki) \
             .filter(Wiki.id_disease == id_disease, Wiki.language == language).first()
-        if not wiki_on_db:
-            wiki = Wiki(id_disease=id_disease, language=language, title=title, link=link)
+        if not wiki:
+            wiki = Wiki(id_disease=id_disease, language=language, title=title.lower(), link=link)
             session.add(wiki)
-        else:
-            wiki_on_db.title = title
-            wiki_on_db.link = link
+        elif wiki.title != title.lower() or wiki.link != link:
+            wiki.title = title.lower()
+            wiki.link = link
         session.commit()
         session.close()
 
     def add_icd_codes(self, id_disease: int, icd10_code: str, icd11_code: str):
-        icd10 = Icd10(id_disease=id_disease, code=icd10_code)
-        icd11 = Icd11(id_disease=id_disease, code=icd11_code)
+        icd10 = Icd10(id_disease=id_disease, code=icd10_code.lower())
+        icd11 = Icd11(id_disease=id_disease, code=icd11_code.lower())
 
         session: Session = self.db_session()
         session.merge(icd10)
@@ -212,13 +216,13 @@ class SqlController(DbController):
 
     def add_disease_relation(self, id_disease_1: int, id_disease_2: int, rel_type: str) -> None:
         session: Session = self.db_session()
-        rel_on_db: DiseaseRel = session.query(DiseaseRel) \
+        relation: DiseaseRel = session.query(DiseaseRel) \
             .filter(DiseaseRel.id_disease_1 == id_disease_1, DiseaseRel.id_disease_2 == id_disease_2).first()
-        if not rel_on_db:
+        if not relation:
             disease_rel = DiseaseRel(id_disease_1=id_disease_1, id_disease_2=id_disease_2, rel_type=rel_type)
             session.add(disease_rel)
-        else:
-            rel_on_db.rel_type = rel_type
+        elif relation.rel_type != rel_type:
+            relation.rel_type = rel_type
         session.commit()
         session.close()
 
@@ -234,6 +238,25 @@ class SqlController(DbController):
                 'type': disease_rel.rel_type
             })
         return result
+
+    def search_diseases(self, sentence: str) -> list:
+        session: Session = self.db_session()
+        id_diseases_1: List[Disease] = session.query(Disease.id_disease) \
+            .filter(Disease.name.contains(sentence.lower())) \
+            .all()
+        session.close()
+        id_diseases_2: List[Wiki] = session.query(Wiki.id_disease) \
+            .filter(Wiki.title.contains(sentence.lower())) \
+            .all()
+        session.close()
+
+        id_diseases: set = set()
+        for item in id_diseases_1:
+            id_diseases.add(item.id_disease)
+        for item in id_diseases_2:
+            id_diseases.add(item.id_disease)
+
+        return self.get_disease_info(list(id_diseases))
 
     def export_to_prolog(self) -> str:
         return ''

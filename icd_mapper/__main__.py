@@ -67,15 +67,29 @@ class GetIcd11(Resource):
 # noinspection DuplicatedCode
 @ns_mapper.route('/disease/<id>')
 @ns_mapper.doc(params={'id': 'Internal disease ID'})
+@ns_mapper.doc(params={'format': 'Response data format (json, json-pretty)'})
 @ns_mapper.response(200, 'Success')
 @ns_mapper.response(404, 'Not Found')
 @ns_mapper.response(500, 'Internal Server Error')
 @ns_mapper.response(503, 'Service Unavailable')
 class GetDisease(Resource):
-    @ns_mapper.doc(params={'format': 'Response data format (json, json-pretty)'})
     def get(self, id: int):
         """This endpoint returns all information about disease matching database id."""
         return ApiController.get_disease(request, id)
+
+
+# noinspection DuplicatedCode
+@ns_mapper.route('/disease/search')
+@ns_mapper.doc(params={'sentence': 'Sentence to be searched'})
+@ns_mapper.doc(params={'format': 'Response data format (json, json-pretty)'})
+@ns_mapper.response(200, 'Success')
+@ns_mapper.response(404, 'Not Found')
+@ns_mapper.response(500, 'Internal Server Error')
+@ns_mapper.response(503, 'Service Unavailable')
+class SearchDisease(Resource):
+    def get(self):
+        """This endpoint returns all information about disease matching containing sentence."""
+        return ApiController.search_disease(request)
 
 
 @ns_additional_info.route('/')

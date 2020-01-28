@@ -266,3 +266,20 @@ def delete_additional_info(id_disease: int) -> Response:
 
     db_controller.delete_additional_info(id_disease)
     return Response(status=200)
+
+
+def search_disease(request):
+    db_connection = _check_database_connection()
+    if db_connection.status_code != 0:
+        return db_connection
+
+    response_format: str = request.args.get('format')
+    sentence: str = request.args.get('sentence')
+    result: list = db_controller.search_diseases(sentence)
+    if not result:
+        return Response(status=404)
+
+    if response_format == "json-pretty":
+        return Response(response=json.dumps(result, indent=3), status=200, mimetype='application/json')
+    else:
+        return Response(response=json.dumps(result), status=200, mimetype='application/json')

@@ -212,6 +212,17 @@ class DbController:
         pass
 
     @abstractmethod
+    def search_diseases(self, sentence: str) -> list:
+        """Searches disease name and wikipedia titles.
+
+        :param sentence: sentence to be searched in DISEASES and WIKI table
+        :type sentence: str
+        :return: list of diseases matching sentence
+        :rtype: list
+        """
+        pass
+
+    @abstractmethod
     def export_to_prolog(self) -> str:
         """TODO: No documentation yet
 
