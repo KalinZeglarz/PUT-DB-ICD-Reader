@@ -1,7 +1,7 @@
 """Unit tests for IcdMapper class"""
 from unittest import TestCase
 
-from icd_reader.classes.IcdMapper import IcdMapper
+from icd_mapper.classes.IcdMapper import IcdMapper
 
 
 class TestIcdMapper(TestCase):
@@ -10,6 +10,6 @@ class TestIcdMapper(TestCase):
         client_secret: str = "qfRSgmvnd7b6NBvYB3NAs0UwIPEU3pXAiFQODGMFhb8="
 
         icd_mapper: IcdMapper = IcdMapper(client_id, client_secret)
-        icd_10_code: str = "H02.2"
-        icd_11_code: str = icd_mapper.icd_10_to_icd_11(icd_10_code)
-        self.assertEqual("9A03.40", icd_11_code)
+        icd10_code: str = "H02.2"
+        icd11_code: str = icd_mapper.icd_10_to_icd_11(icd10_code)
+        self.assertEqual("9A03.40", icd11_code)
